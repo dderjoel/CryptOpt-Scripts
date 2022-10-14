@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# vim: set syntax=bash:
+
+#get variables from ansible into one string
+runArgs="{{ runArgs | join (" ") }}"
+CC="{{ CC }}"
+
+#working dir
+wd=${1:-.}
+
+# kill all running node
+pkill node
+# pkill htop
+
+tmux select-window -t 0
+# kill all panes
+tmux kill-pane -a
+
+# one htop at the start
+tmux split-pane htop
+tmux kill-pane -t 0
+
+# don't start just before nakhash is going to switch panes
+[[ $(date +"%S") -gt 55 ]] && echo "waiting for the glory time to arrive " && sleep 5 && echo "the time has come."
+
+
+# enable pmc (performance counters)
+echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
+
+# and for every cpu start one proc
+for mask in {{ cpumasklist | default(1) }}; do
+  tmux split-pane bash
+  # if using split-pane ./run.sh ..., the pane closes once the command finished.
+  tmux send-keys "CC=${CC} taskset ${mask} ${wd}/run.sh ${runArgs} --seed $(date +%N) " C-m
+  tmux select-layout even-vertical
+done
+
+tmux select-layout even-vertical

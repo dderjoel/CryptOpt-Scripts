@@ -1,0 +1,39 @@
+#!/usr/bin/env ansible-playbook
+# vim: set tw=2 sw=2 sts=2:
+
+
+- hosts: intel amd
+  become: false
+  vars:
+    CC: clang
+    runArgs:
+      # - "--bridge fiat"
+      # - "--curve curve25519"
+      # - "--method mul"
+      - "--bridge manual"
+      - "--cFile ./test/manual-bridge/dettman/secp256k1_dettman_64.c"
+      - "--jsonFile ./test/manual-bridge/dettman/secp256k1_dettman_64.json"
+      - "--evals 100000"
+      - "--bets 10"
+      - "--betRatio 0.1"
+      # - "--no-proof"
+
+  tasks:
+    - name: ensure session.mux is up to date
+      template:
+        src: ./templates/session.mux.j2
+        dest: ~/session.mux
+        mode: '0744'
+
+    - name: Look for the "tmux" process
+      shell: ps -ef | grep tmux | grep -v grep
+      ignore_errors: yes
+      register: process_list
+      changed_when: false
+
+    - name: Start "tmux" if needed
+      command: tmux new-session -d
+      when: "process_list.stdout.find('tmux') == -1"
+
+    - name: Will start the tmux optimiser based on current ./session.mux
+      command: bash ~/session.mux cryptopt &
