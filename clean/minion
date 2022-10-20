@@ -41,7 +41,7 @@ function process_asmfile() {
   # base command
   cmd="PATH=\$PATH:${NODE_PATH} /usr/bin/env node ${CRYPTOPT_ROOT}/dist/CountCycle.js ${asm} 2>>${MINION_LOG}.${MINION_ID}.err"
 
-  if [[ "${asm}" = "manual"* ]]; then
+  if [[ "${asm}" = *"manual"* ]]; then
     # manual files, we need to find the c/json files.
 
     # quick hack here may need improvement
