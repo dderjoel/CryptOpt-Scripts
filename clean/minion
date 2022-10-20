@@ -32,8 +32,8 @@ function process_asmfile() {
   asm=$1 # full path of an assembly file
   test -z "${asm}" && log "ERROR: called process_asmfile with null-ish argument"
 
-  # delete fails, and the asms with less than an evals count which is 5 digits long (checking with grep inside the files contents)
-  if [[ "${asm}" =~ .*Fail.* ]] || [[ "${asm}" =~ .*incorrect.* ]] || grep --quiet '.*/ [0-9]\{0,2\} evals' "${asm}"; then
+  # delete fails, incorrects, and the asms with less than an 3 digits long evals' (i.e. at least 1k evals)(checking with grep inside the files contents)
+  if [[ "${asm}" =~ .*Fail.* ]] || [[ "${asm}" =~ .*incorrect.* ]] || grep --quiet '.* [0-9]\{0,3\} evals' "${asm}"; then
     rm "${asm}"
     log "Deleted:         ${asm}"
     return 0
