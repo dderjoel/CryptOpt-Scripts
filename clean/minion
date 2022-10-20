@@ -1,0 +1,149 @@
+# based on https://www.celersms.com/threadpool-bash.htm
+# vim: set ft=sh:
+#shellcheck shell=bash
+
+set -o pipefail   # don't hide errors within pipes
+shopt -s nullglob # don't iterate on empty globs
+
+# The first command line argument is a unique ID (affinity):
+MINION_ID=$1
+
+# file gets created, if a minion is idling, removed when it starts its work
+idling_file="${IDLING_PREFIX}.${MINION_ID}"
+
+# load common variables
+source ./_vars .
+
+# keep this many asm files.
+NO_KEEP=30
+NO_MIN_EVAL=1000 #JSON  min number of evaluations.
+
+function log() {
+  printf '%(%Y-%m-%d %H:%M:%S)T [Minion#\e[36m%4s\e[0m] %s\n' '-1' "$MINION_ID" "$1" >>"${WORKER_LOG}"
+}
+
+function shutdown_clean() {
+  set_non_idling
+  exit 0
+}
+trap shutdown_clean 1 2 15
+
+function process_asmfile() {
+  asm=$1 # full path of an assembly file
+  test -z "${asm}" && log "ERROR: called process_asmfile with null-ish argument"
+
+  # delete fails, and the asms with less than an evals count which is 5 digits long (checking with grep inside the files contents)
+  if [[ "${asm}" =~ .*Fail.* ]] || [[ "${asm}" =~ .*incorrect.* ]] || grep --quiet '.*/ [0-9]\{0,2\} evals' "${asm}"; then
+    rm "${asm}"
+    log "Deleted:         ${asm}"
+    return 0
+  fi
+
+  # base command
+  cmd="PATH=\$PATH:${NODE_PATH} /usr/bin/env node ${CRYPTOPT_ROOT}/dist/CountCycle.js ${asm} 2>>${MINION_LOG}.err"
+
+  if [[ "${asm}" = "manual"* ]]; then
+    # manual files, we need to find the c/json files.
+
+    # quick hack here may need improvement
+    if [[ "${asm}" = *"curve25519_solinas_mulmod"* ]]; then
+      cmd="${cmd} ${CRYPTOPT_ROOT}/test/manual-bridge/modmul/curve25519_solinas.c ${CRYPTOPT_ROOT}/test/manual-bridge/modmul/curve25519_solinas.json"
+    fi
+    if [[ "${asm}" = *"secp256k1_dettman_mul"* ]]; then
+      cmd="${cmd} ${CRYPTOPT_ROOT}/test/manual-bridge/dettman/secp256k1_dettman_64.c ${CRYPTOPT_ROOT}/test/manual-bridge/dettman/secp256k1_dettman_64.json"
+    fi
+  fi
+
+  log "${cmd}"
+  cycl=$(eval "${cmd}")
+
+  [[ -z "${cycl}" ]] && log "ERROR. CountCycle.js did not return a string." && return
+  line=$(printf "%s %s\n" "${cycl}" "$(basename "${asm}")")
+
+  infofile="$(dirname "${asm}")/${INFO_FILE_WIP}"
+  log "$line >> ${infofile}"
+  printf "%s\n" "$line" >>"${infofile}"
+}
+
+function process_symbol_folder() {
+
+  log "Processing Dir  ${1}"
+  infofile="${1}/${INFO_FILE}"
+  infofile_wip="${1}/${INFO_FILE_WIP}"
+  infofile_sort="${infofile}-sort"
+
+  test ! -e "${infofile_wip}" && log "${infofile_wip} does not exist. Skipping ${1}" && return
+  # sort the info file
+  sort --general-numeric-sort <"${infofile_wip}" >"${infofile_sort}"
+  log "sorted ${infofile_wip} into ${infofile_sort}"
+
+  # keep the NO_KEEP best of the good asms
+  head -n "${NO_KEEP}" <"${infofile_sort}" >"${infofile}"
+  log "${NO_KEEP} best from ${infofile_sort} > ${infofile}"
+
+  # delete the bad results.
+  while read -r base; do
+    file="${1}/${base}"
+    test -e "${file}" &&
+      rm "${file}" &&
+      log "Deleted ${file} because it did not make the cut of being in the ${NO_KEEP} best files."
+  done < <(tail -n "+${NO_KEEP}" <"${infofile_sort}" | awk '{print $2}')
+
+  rm "${infofile_sort}" "${infofile_wip}"
+}
+
+function set_non_idling() {
+  if test -e "${idling_file}"; then
+    log "no longer idling"
+    rm "${idling_file}"
+  fi
+}
+
+function set_idling() {
+  log "idling..."
+  touch "${idling_file}"
+}
+
+function work() {
+  shopt -s extglob
+  case "${1}" in
+  *.asm)
+    process_asmfile "${1}"
+    ;;
+  *.json)
+    log "json-file processing is temporarily disabled."
+    #process_jsonfile "${1}"
+    ;;
+  *)
+    process_symbol_folder "${1}"
+    ;;
+  esac
+}
+
+# Wait for the queue
+while [ ! -e "${CURVE_QUEUE_NAME}" ]; do
+  log "waiting for Q to exist. ${CURVE_QUEUE_NAME}"
+  sleep 1
+done
+set_idling
+
+touch "${CURVE_MINION_LOCK_NAME}"
+exec 3<"${CURVE_QUEUE_NAME}"       # FD3 <- queue
+exec 4<"${CURVE_MINION_LOCK_NAME}" # FD4 <- lock
+
+while true; do
+  # Read the next task from the queue
+  flock 4
+  IFS= read -r -u 3 task
+  flock -u 4
+  if [ -z "${task}" ]; then
+    set_idling
+    sleep 1
+    continue
+  fi
+
+  set_non_idling
+  log "Processing:      ${task}"
+  work "${task}"
+  log "Done processing: ${task}"
+done

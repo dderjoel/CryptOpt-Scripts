@@ -1,0 +1,31 @@
+#!/usr/bin/env ansible-playbook
+# vim: set tw=2 sw=2 sts=2:
+
+- hosts: intel amd
+# - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
+  become: false
+  gather_facts: false
+  tasks:
+    - name: ensure clean.mux is up to date
+      template:
+        src: ./templates/clean.mux.j2
+        dest: ~/clean.mux
+        mode: '0744'
+
+    - name: Look for the "tmux" process
+      shell: ps -ef | grep tmux | grep -v grep
+      ignore_errors: yes
+      register: process_list
+      changed_when: false  
+
+    - name: Start "tmux" if needed
+      command: tmux new-session -d
+      when: "process_list.stdout.find('tmux') == -1"  
+
+    - name: make install in the project directory
+      make:
+        chdir: ~/cryptopt/src
+        target: install
+
+    - name: Will start the tmux clean based on current ./clean.mux
+      command: bash ~/clean.mux &

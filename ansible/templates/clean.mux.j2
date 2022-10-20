@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# vim: set syntax=bash:
+
+# setting variables.
+mask="{{ cpumasklist | default('') }}"
+freq={{ low_freq | default('') }}
+
+# kill all running node / clean_resultsfolder
+pkill node
+while read -r pid; do
+  kill "${pid}" 2>/dev/null
+  sleep 0
+  kill -0 "$pid" 2>/dev/null && sleep 1 && kill -9 "$pid" 2>/dev/null
+  echo "killed ${pid}"
+done < <(pgrep --full 'worker [0-f]+')
+
+tmux select-window -t 0
+# kill all panes
+tmux kill-pane -a
+
+# one htop at the start
+tmux split-pane htop
+tmux kill-pane -t 0
+
+echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
+
+tmux select-layout even-vertical
+tmux split-pane bash
+tmux send-keys "~/cryptopt/src/automate/script-collection/clean_resultsfolder/clean_resultsfolder.sh '${mask}' ${freq} | tee -a ~/cryptopt/src/automate/script-collection/clean_resultsfolder/boss.log" C-m
+
+tmux select-layout even-vertical
+tmux split-pane bash
+tmux send-keys "sleep 4; tail -f ~/cryptopt/src/automate/script-collection/clean_resultsfolder/worker.log" C-m

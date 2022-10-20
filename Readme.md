@@ -9,8 +9,9 @@ This repository contains scripts to ease the development, run and evaluation of 
 |-----|----|--- 
 | `_internal`            | D/L | helper functions / constant declarations in multiple languages, which are used in different scripts. You better not touch/use. API no guaranteed to be stable|
 | `ansible`              | D   | To administer runs on remote lab machines |
+| `clean`                | L   | Clean scripts to initialize or to evaluate |
 | `convert`              | D/L | Convert scripts |
-| `count`                | D/L | Count scripts. |
+| `count`                | D/L | Count scripts |
 | `misc`                 | D/L | Miscellaneous scripts. Used on both. |
 
 Key: Usage (D - Dev Machine, L - Lab i.e. Remote machine)
