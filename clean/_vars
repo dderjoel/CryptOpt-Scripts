@@ -12,7 +12,7 @@ ROOT_LOCAL=$(dirname "$0")
 
 set -e # if those paths are not working, fail
 NODE_PATH="$(realpath "${ROOT_LOCAL}/../../../bins/node/bin")"
-CRYPTOPT_ROOT="$(realpath "${ROOT_LOCAL}/../../")"
+CRYPTOPT_ROOT="$(realpath "${ROOT_LOCAL}/../../../")"
 set +e
 
 export CRYPTOPT_ROOT NODE_PATH
