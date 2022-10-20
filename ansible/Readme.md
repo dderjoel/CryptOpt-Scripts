@@ -16,6 +16,7 @@ Ansible can be used to run all the experiments and evaluations on the machines c
 | `pull-build~`          | Recursively pulls the repository and builds it. |
 | `start-session~`       | A 'session' is an optimization run. Parameters are set, session script (tmux session) is created and the session runs in the background.  More info in `templates/session.mux.j2`| 
 | `clean~`               | After a 'session' is completed, there are many result files. This mux-session will re-evaluate the most promising ones thoroughly and caches the results in a `.last_clean_run`-file in every result folder. More info in `templates/clean.mux.j2` and `../clean/`| 
+| `update~`              | Pretty much an `sudo apt update && sudo apt upgrade -y`| 
 
 Key: (`~`: `.playbook.yaml` )
 

@@ -1,0 +1,18 @@
+#!/usr/bin/env ansible-playbook
+# vim: set tw=2 sw=2 sts=2:
+
+- hosts: intel amd
+# - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
+  become: true
+  tasks:
+    - name: Update apt repo and cache
+      apt:
+        update_cache: yes
+    - name: Upgrade apt packages
+      apt:
+        upgrade: dist
+    - name: Check if a reboot is needed for Debian and Ubuntu boxes
+      register: reboot_required_file
+      stat:
+        path: /var/run/reboot-required
+        get_md5: no
