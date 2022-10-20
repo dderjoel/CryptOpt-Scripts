@@ -24,8 +24,8 @@
 
     - name: make install in the project directory
       make:
-        chdir: ~/cryptopt/src
-        target: install
+        chdir: ~/cryptopt
+        target: build
 
     - name: Will start the tmux clean based on current ./clean.mux
       command: bash ~/clean.mux &

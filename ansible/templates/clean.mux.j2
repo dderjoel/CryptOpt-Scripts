@@ -3,7 +3,7 @@
 
 # setting variables.
 mask="{{ cpumasklist | default('') }}"
-freq={{ low_freq | default('') }}
+freq="{{ low_freq | default('') }}"
 
 # kill all running node / clean_resultsfolder
 pkill node
@@ -12,7 +12,7 @@ while read -r pid; do
   sleep 0
   kill -0 "$pid" 2>/dev/null && sleep 1 && kill -9 "$pid" 2>/dev/null
   echo "killed ${pid}"
-done < <(pgrep --full 'worker [0-f]+')
+done < <(pgrep --full 'minion [0-f]+')
 
 tmux select-window -t 0
 # kill all panes
@@ -26,8 +26,8 @@ echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
 
 tmux select-layout even-vertical
 tmux split-pane bash
-tmux send-keys "~/cryptopt/src/automate/script-collection/clean_resultsfolder/clean_resultsfolder.sh '${mask}' ${freq} | tee -a ~/cryptopt/src/automate/script-collection/clean_resultsfolder/boss.log" C-m
+tmux send-keys "~/cryptopt/modules/scripts/clean/gru.sh '${mask}' ${freq} | tee -a ~/cryptopt/modules/scripts/clean/gru.log" C-m
 
 tmux select-layout even-vertical
 tmux split-pane bash
-tmux send-keys "sleep 4; tail -f ~/cryptopt/src/automate/script-collection/clean_resultsfolder/worker.log" C-m
+tmux send-keys "sleep 4; tail -f ~/cryptopt/modules/scripts/clean/minion.log" C-m
