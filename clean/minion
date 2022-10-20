@@ -16,10 +16,9 @@ source ./_vars .
 
 # keep this many asm files.
 NO_KEEP=30
-NO_MIN_EVAL=1000 #JSON  min number of evaluations.
 
 function log() {
-  printf '%(%Y-%m-%d %H:%M:%S)T [Minion#\e[36m%4s\e[0m] %s\n' '-1' "$MINION_ID" "$1" >>"${WORKER_LOG}"
+  printf '%(%Y-%m-%d %H:%M:%S)T [Minion#\e[36m%4s\e[0m] %s\n' '-1' "$MINION_ID" "$1" >>"${MINION_LOG}"
 }
 
 function shutdown_clean() {
