@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# vim: set syntax=bash:
+
+# Who is wilson? Better watch 'Cast away' tonight
+
+sleeptime="{{ sleeptime | default (60) }}"
+
+for curve in "{{ curves | default('curve25519') }}"; do
+  for method in square mul; do
+    while
+      echo sleeping
+      sleep ${sleeptime}
+      pgrep node
+    do :; done
+    sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
+    ~/session.mux &
+    echo start $func $curve
+  done
+done
