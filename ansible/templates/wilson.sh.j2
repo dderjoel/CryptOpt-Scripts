@@ -4,8 +4,8 @@
 # Who is wilson? Better watch 'Cast away' tonight
 
 sleeptime="{{ sleeptime | default (60) }}"
-
-for curve in "{{ curves | default('curve25519') }}"; do
+IFS=' ' read -ra curves <<<"{{ curves | default('curve25519') }}"
+for curve in "${curves[@]}"; do
   for method in square mul; do
     while
       echo sleeping
@@ -13,7 +13,7 @@ for curve in "{{ curves | default('curve25519') }}"; do
       pgrep node
     do :; done
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
-    ~/session.mux &
+    ~/session.mux cryptopt &
     echo start $func $curve
   done
 done
