@@ -3,7 +3,6 @@
 
 
 - hosts: intel amd
-  become: false
   vars:
     CC: clang
     runArgs:
