@@ -10,7 +10,7 @@ for curve in "${curves[@]}"; do
     while
       echo sleeping
       sleep ${sleeptime}
-      pgrep node
+      pgrep node -U $UID
     do :; done
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
     ~/session.mux cryptopt &
