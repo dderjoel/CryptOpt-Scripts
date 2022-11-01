@@ -4,6 +4,7 @@
 # setting variables.
 mask="{{ cpumasklist | default('') }}"
 freq="{{ low_freq | default('') }}"
+symbol=${1}
 
 # kill all running node / clean_resultsfolder
 pkill node
@@ -26,7 +27,7 @@ echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
 
 tmux select-layout even-vertical
 tmux split-pane bash
-tmux send-keys "~/cryptopt/modules/scripts/clean/gru.sh '${mask}' ${freq} | tee -a ~/cryptopt/modules/scripts/clean/gru.log" C-m
+tmux send-keys "CPUMASK='${mask}' FREQ='${freq}' SYMBOL='${symbol}' ~/cryptopt/modules/scripts/clean/gru.sh | tee -a ~/cryptopt/modules/scripts/clean/gru.log" C-m
 
 tmux select-layout even-vertical
 tmux split-pane bash

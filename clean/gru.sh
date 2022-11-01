@@ -2,18 +2,25 @@
 
 shopt -s nullglob # dont iterate on empty globs
 
-# can be called with $1 being a cpulist and $2 being a frequency to set the cpus to while measuring
-#               without parameters, defaults to one minion with mask ff and min freq available
-
 set -o pipefail # don't hide errors within pipes
 ROOT=$(dirname "$0")
 readonly ROOT
 echo "root: ${ROOT}"
 cd "${ROOT}" || exit 1
 
-# should point to <CRYPTOPT_ROOT>/results
+# can be called with set environment varibales:
+# CPUMASK being a cpulist (default ff)
+cpumask=${CPUMASK:=ff}
+# FREQ being a frequency to set the cpus to while measuring (default <min available>)
+min_freq=${FREQ:=}
+# SYMBOL being a symbol-path like 'manual/fiat_curve25519_solinas_mulmod' (default all in `cryptopt/results/`)
+symbol_only=${SYMBOL:=}
+
+# RES being a path to the results directory. defaults to <CRYPTOPT_ROOT>/results
 res=${RES:=$(realpath ./../../../results)}
-set_frequency_script=../misc/set_frequency.sh
+
+# should point to <CRYPTOPT_ROOT>/results
+set_frequency_script=$(realpath ../misc/set_frequency.sh)
 
 # This array holds the folders like ../fiat_curve25519_carry_square, if some asm files in that folder are considered to be re-evaluated.
 # All of those will be re-evaluated in parallel.
@@ -91,42 +98,49 @@ function start_minions() {
   mkfifo "${CURVE_QUEUE_NAME}"
 
   # Launch N minions in parallel
-  for mask in $1; do
+  for mask in ${cpumask}; do
     /usr/bin/env bash minion "${mask}" &
     taskset --pid "${mask}" "${!}"
   done
 }
 
-function fillQ() {
-  for symbol in "${res}"/*/*; do
+function pushQ() {
 
-    # if that info file is already there.
-    [[ -e "${symbol}/${INFO_FILE}" ]] &&
-      # and there is no newer asm file in that folder
-      [[ ! $(find "${symbol}" -newer "${symbol}/${INFO_FILE}" -regex '.*asm') ]] &&
-      # we can skip that folder.
-      echo "SKIPPED ${symbol}, because there is no newer files (*asm) than ${INFO_FILE}" && continue
+  symbol=$1
+  # if that info file is already there.
+  [[ -e "${symbol}/${INFO_FILE}" ]] &&
+    # and there is no newer asm file in that folder
+    [[ ! $(find "${symbol}" -newer "${symbol}/${INFO_FILE}" -regex '.*asm') ]] &&
+    # we can skip that folder.
+    echo "SKIPPED ${symbol}, because there is no newer files (*asm) than ${INFO_FILE}" && return
 
-    # remove another potential symbol/info-wip file because
-    # it needs to be overwritten by subsequent calls, which themselves shall not append to an older file.
-    rm --force "${symbol}/${INFO_FILE_WIP}"
-    for file in "${symbol}"/*.asm; do
-      queue "${file}"
-    done
-    echo "Q filled with files. Adding ${symbol} to list_symbol_sort"
-    list_symbol_sort+=("${symbol}")
-
+  # remove another potential symbol/info-wip file because
+  # it needs to be overwritten by subsequent calls, which themselves shall not append to an older file.
+  rm --force "${symbol}/${INFO_FILE_WIP}"
+  for file in "${symbol}"/*.asm; do
+    queue "${file}"
   done
+  echo "Q filled with files. Adding ${symbol} to list_symbol_sort"
+  list_symbol_sort+=("${symbol}")
+}
+
+function fillQ() {
+
+  if [[ -n ${symbol_only} ]]; then
+    pushQ "${symbol_only}"
+  else
+    for symbol in "${res}"/*/*; do
+      pushQ "${symbol}"
+    done
+  fi
 
 }
 
 kill_minions
 
-#$2 may be a frequency.
-sudo ${set_frequency_script} 'fix' "${2}"
+sudo "${set_frequency_script}" 'fix' "${min_freq}"
 
-cpumask=${1:-"ff"}
-start_minions "${cpumask}"
+start_minions
 fillQ
 sleep 1
 printf "waiting for all minions to finish analysing.\n"
