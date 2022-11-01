@@ -17,7 +17,7 @@ tmux select-window -t 0
 tmux kill-pane -a
 
 # one htop at the start
-tmux split-pane htop
+tmux split-pane 'htop -F node'
 tmux kill-pane -t 0
 
 # don't start just before nakhash is going to switch panes
