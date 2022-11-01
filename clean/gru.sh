@@ -127,7 +127,7 @@ function pushQ() {
 function fillQ() {
 
   if [[ -n ${symbol_only} ]]; then
-    pushQ "${symbol_only}"
+    pushQ "${res}/${symbol_only}"
   else
     for symbol in "${res}"/*/*; do
       pushQ "${symbol}"
