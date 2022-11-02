@@ -12,6 +12,7 @@ This repository contains scripts to ease the development, run and evaluation of 
 | `clean`                | L   | Clean scripts to initialize or to evaluate |
 | `convert`              | D/L | Convert scripts |
 | `count`                | D/L | Count scripts |
+| `tex`                  | D   | Scripts geneating `.tex`-files. |
 | `misc`                 | D/L | Miscellaneous scripts. Used on both. |
 
 Key: Usage (D - Dev Machine, L - Lab i.e. Remote machine)

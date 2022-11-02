@@ -1,0 +1,30 @@
+#!/usr/bin/env ansible-playbook
+# vim: set sw=2 sts=2:
+
+
+# this playbook enables the performance counters, mounts the shared filesystem to /mnt/pil, which contains the (patched) supercop benchmark suite.
+# will then run the benchmark
+
+- hosts: intel amd
+  become: false
+  tasks:
+    - name: enable perf_counter
+      become: true
+      shell:
+        cmd: echo "1" > /proc/sys/kernel/perf_event_paranoid
+
+    - name: MOUNT PIL
+      become: true
+      command: mount /mnt/pil
+      # mount:
+      #   fstype: nfs
+      #   path: /mnt/pil
+      #   # src: myserver:/mnt/myshareddir (moved to /etc/fstab on servers)
+      #   state: mounted
+
+    - name: run bench
+      command:
+        # cmd: ./bench.sh curve25519
+        cmd: ./bench.sh secp256k1
+        chdir: /mnt/pil/su/supercop-20221005
+
