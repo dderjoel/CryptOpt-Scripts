@@ -6,14 +6,25 @@
   vars:
     CC: clang
     runArgs:
-      # - "--bridge fiat"
-      # - "--curve curve25519"
-      # - "--method mul"
-      - "--bridge manual"
-      - "--cFile ./test/manual-bridge/dettman/secp256k1_dettman_64.c"
-      - "--jsonFile ./test/manual-bridge/dettman/secp256k1_dettman_64.json"
-      - "--evals 100000"
-      - "--bets 10"
+      # example running from fiat
+      - "--bridge fiat"
+      - "--curve curve25519"
+      - "--method mul"
+
+      # example running manual
+      # - "--bridge manual"
+      # - "--cFile ./test/manual-bridge/dettman/secp256k1_dettman_64.c"
+      # - "--jsonFile ./test/manual-bridge/dettman/secp256k1_dettman_64.json"
+      # - "--cFile ./test/manual-bridge/modmul/curve25519_solinas.c"
+      # - "--jsonFile ./test/manual-bridge/modmul/curve25519_solinas.json"
+
+      # example running from bitcoincore
+      # - "--bridge bitcoin-core"
+      # - "--curve secp256k1"
+      # - "--method square"
+
+      - "--evals 200k"
+      - "--bets 20"
       - "--betRatio 0.1"
       # - "--no-proof"
 
