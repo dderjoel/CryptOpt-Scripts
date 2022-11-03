@@ -18,8 +18,8 @@
       # - "--jsonFile ./test/manual-bridge/dettman/secp256k1_dettman_64.json"
       # - "--cFile ./test/manual-bridge/modmul/curve25519_solinas.c"
       # - "--jsonFile ./test/manual-bridge/modmul/curve25519_solinas.json"
-      - "--evals 500000"
-      - "--bets 10"
+      - "--evals 200k"
+      - "--bets 20"
       - "--betRatio 0.1"
       # - "--no-proof"
 
