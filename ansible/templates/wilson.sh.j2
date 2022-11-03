@@ -32,7 +32,7 @@ wait_for_node() {
 
 # kill all currently running node procs if there is any
 pkill node -U $UID
-log "==========\nHi. Starting my work. :)"
+log "Hi. Starting my work. :)"
 
 IFS=' ' read -ra curves <<<"{{ curves | default('curve25519') }}"
 for curve in "${curves[@]}"; do
@@ -50,4 +50,4 @@ for curve in "${curves[@]}"; do
     log " done ${curve}   ${method}   ${elapsedseconds}"
   done
 done
-log "==========\nDone for the day. See ya"
+log "Done for the day. See ya"
