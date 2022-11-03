@@ -28,13 +28,13 @@ for curve in "${curves[@]}"; do
   for method in square mul; do
 
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] %s %s\n' '-1' $(hostname) "start" "${curve}" "${func}" | tee -a $logfile
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] start %s %s\n' '-1' $(hostname) "${curve}" "${method}" | tee -a $logfile
     starttime="$(TZ=UTC0 printf '%(%s)T\n' '-1')"
 
     ~/session.mux cryptopt &
     wait_for_node
 
     elapsedseconds=$(($(TZ=UTC0 printf '%(%s)T\n' '-1') - starttime))
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] %s %s took %ss\n\n' '-1' $(hostname) "done" "${curve}" "${func}" "${elapsedseconds}" | tee -a $logfile
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s]  done %s %s took %ss\n\n' '-1' $(hostname) "done" "${curve}" "${method}" "${elapsedseconds}" | tee -a $logfile
   done
 done
