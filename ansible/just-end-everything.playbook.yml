@@ -1,0 +1,14 @@
+#!/usr/bin/env ansible-playbook
+# vim: set tw=2 sw=2 sts=2:
+
+
+- hosts: intel amd
+  vars:
+  tasks:
+    - name: Will stop wilsons
+      shell: pgrep -u $(id -u) --full wilson | while read -r pid; do kill ${pid}; done
+      ignore_errors: yes
+
+    - name: Will stop all CryptOpts
+      shell: pgrep -u $(id -u) --full CryptOpt.js | while read -r pid; do kill ${pid}; done
+      ignore_errors: yes
