@@ -9,7 +9,7 @@ CC="{{ CC }}"
 wd=${1:-.}
 
 # kill all running node
-pkill node
+pkill node -U $UID
 # pkill htop
 
 tmux select-window -t 0
