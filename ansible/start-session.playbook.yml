@@ -46,4 +46,6 @@
       when: "process_list.stdout.find('tmux') == -1"
 
     - name: Will start the tmux optimiser based on current ./session.mux
-      command: bash ~/session.mux cryptopt &
+      command: bash ~/session.mux cryptopt
+      async: 2592000               # 60*60*24*30 – 1 month
+      poll: 0
