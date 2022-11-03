@@ -11,16 +11,31 @@ flock -x -n 9 || exit      # grab that lock, or exit the script early
 #singleton (end)
 
 sleeptime="{{ sleeptime | default (60) }}"
+
+logfile=./wilson.log
+
+wait_for_node() {
+  pgrep node -U $UID || return
+  while
+    echo sleeping
+    sleep ${sleeptime}
+    pgrep node -U $UID
+  do :; done
+}
+
+wait_for_node
 IFS=' ' read -ra curves <<<"{{ curves | default('curve25519') }}"
 for curve in "${curves[@]}"; do
   for method in square mul; do
-    while
-      echo sleeping
-      sleep ${sleeptime}
-      pgrep node -U $UID
-    do :; done
+
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] %s %s\n' '-1' $(hostname) "start" "${curve}" "${func}" | tee -a $logfile
+    starttime="$(TZ=UTC0 printf '%(%s)T\n' '-1')"
+
     ~/session.mux cryptopt &
-    echo start $func $curve
+    wait_for_node
+
+    elapsedseconds=$(($(TZ=UTC0 printf '%(%s)T\n' '-1') - starttime))
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] %s %s took %ss\n\n' '-1' $(hostname) "done" "${curve}" "${func}" "${elapsedseconds}" | tee -a $logfile
   done
 done
