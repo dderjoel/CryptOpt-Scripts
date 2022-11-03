@@ -4,10 +4,15 @@
 # Who is wilson? Better watch 'Cast away' tonight
 
 #singleton (Start)
+
 umask 000                  # allow all users to access the file we're about to create
 exec 9>"/tmp/${0##*/}.lck" # open lockfile on FD 9, based on basename of argv[0]
 umask 022                  # move back to more restrictive file permissions
-flock -x -n 9 || exit      # grab that lock, or exit the script early
+if ! flock -x -n 9; then
+  echo "cant get lock. maybe already running."
+  exit 1
+fi #grab that lock, or exit the script early
+
 #singleton (end)
 
 sleeptime="{{ sleeptime | default (60) }}"
@@ -30,13 +35,13 @@ for curve in "${curves[@]}"; do
   for method in square mul; do
 
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s] start %s %s\n' '-1' $(hostname) "${curve}" "${method}" | tee -a $logfile
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %15s] start %s %s\n' '-1' $(hostname) "${curve}" "${method}" >>"${logfile}"
     starttime="$(TZ=UTC0 printf '%(%s)T\n' '-1')"
 
     ~/session.mux cryptopt &
     wait_for_node
 
     elapsedseconds=$(($(TZ=UTC0 printf '%(%s)T\n' '-1') - starttime))
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %20s]  done %s %s took %ss\n\n' '-1' $(hostname) "done" "${curve}" "${method}" "${elapsedseconds}" | tee -a $logfile
+    printf '%(%Y-%m-%d %H:%M:%S)T [Host %15s]  done %s %s %ss\n\n' '-1' $(hostname) "${curve}" "${method}" "${elapsedseconds}" >>"${logfile}"
   done
 done
