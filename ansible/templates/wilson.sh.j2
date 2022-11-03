@@ -15,7 +15,6 @@ sleeptime="{{ sleeptime | default (60) }}"
 logfile=./wilson.log
 
 wait_for_node() {
-  pgrep node -U $UID || return
   while
     echo sleeping
     sleep ${sleeptime}
