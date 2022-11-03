@@ -17,7 +17,10 @@ fi #grab that lock, or exit the script early
 
 sleeptime="{{ sleeptime | default (60) }}"
 
-logfile=./wilson.log
+log() {
+  logfile=./wilson.log
+  printf '%(%Y-%m-%d %H:%M:%S)T [Host %15s] %s \n' '-1' $(hostname) "${1}" >>"${logfile}"
+}
 
 wait_for_node() {
   while
@@ -29,19 +32,22 @@ wait_for_node() {
 
 # kill all currently running node procs if there is any
 pkill node -U $UID
+log "==========\nHi. Starting my work. :)"
 
 IFS=' ' read -ra curves <<<"{{ curves | default('curve25519') }}"
 for curve in "${curves[@]}"; do
   for method in square mul; do
 
     sed -i -e "s/--method [^ ]*/--method ${method}/" -e "s/--curve [^ ]*/--curve ${curve}/" ~/session.mux
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %15s] start %s %s\n' '-1' $(hostname) "${curve}" "${method}" >>"${logfile}"
-    starttime="$(TZ=UTC0 printf '%(%s)T\n' '-1')"
 
+    log "start ${curve} ${method}"
+
+    starttime="$(TZ=UTC0 printf '%(%s)T\n' '-1')"
     ~/session.mux cryptopt &
     wait_for_node
-
     elapsedseconds=$(($(TZ=UTC0 printf '%(%s)T\n' '-1') - starttime))
-    printf '%(%Y-%m-%d %H:%M:%S)T [Host %15s]  done %s %s %ss\n\n' '-1' $(hostname) "${curve}" "${method}" "${elapsedseconds}" >>"${logfile}"
+
+    log " done ${curve}   ${method}   ${elapsedseconds}"
   done
 done
+log "==========\nDone for the day. See ya"
