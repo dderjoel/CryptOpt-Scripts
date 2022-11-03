@@ -22,7 +22,9 @@ wait_for_node() {
   do :; done
 }
 
-wait_for_node
+# kill all currently running node procs if there is any
+pkill node -U $UID
+
 IFS=' ' read -ra curves <<<"{{ curves | default('curve25519') }}"
 for curve in "${curves[@]}"; do
   for method in square mul; do
