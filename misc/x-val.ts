@@ -3,8 +3,9 @@
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 
+//////node, x-val.js ...
 const [_, _2, best_folder, destination_fileame] = process.argv;
 
 const NO_COMPILER_SAMPLES = 3; // how many compiler samples for each asm-file there should be
@@ -37,7 +38,7 @@ if (!best_folder) {
 }
 
 const COMPILER = ["gcc", "clang"];
-const path_to_cycle_js: string = path.resolve("../");
+const path_to_cycle_js: string = path.resolve("../../../dist/CountCycle.js");
 
 const results = fs
   .readdirSync(best_folder)
@@ -52,7 +53,7 @@ const results = fs
 
       // getCyclecount for filenames
       const median = Number(
-        execSync(`${path_to_cycle_js} ${filename} `).toString()
+        execFileSync("node", [path_to_cycle_js, filename]).toString()
       );
       acc[sym].push({
         filename,
@@ -65,7 +66,7 @@ const results = fs
       COMPILER.forEach((cc) => {
         for (let i = 0; i < NO_COMPILER_SAMPLES; i++) {
           const median = Number(
-            execSync(`${path_to_cycle_js} ${sym}`, {
+            execFileSync("node", [path_to_cycle_js, filename], {
               env: { CC: cc },
             }).toString()
           );
