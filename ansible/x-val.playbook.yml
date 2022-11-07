@@ -1,0 +1,55 @@
+#!/usr/bin/env ansible-playbook
+# vim: set tw=2 sw=2 sts=2:
+
+- hosts: intel amd
+# - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
+  become: false
+  tasks:
+  vars:
+    asmFolder: /mnt/pil/x-val/asms
+    jsonFolder: /mnt/pil/x-val/
+
+    - name: MOUNT PIL
+      become: true
+      command: mount /mnt/pil
+
+
+    - name: GATHER BEST ASMS
+      command: 
+        chdir: ~/cryptopt/modules/scripts/misc
+        cmd: bash archive-fast-asm.sh
+      environment:
+        DEST: {{asmFolder}}
+
+
+    - name: enable perf_counter
+      become: true
+      shell:
+        cmd: echo "1" > /proc/sys/kernel/perf_event_paranoid
+
+    - name: SET FREQ
+      become: true 
+      command:
+        cmd: ./set_frequency.sh fix {{low_freq}}
+        chdir: ~/cryptopt/modules/scripts/misc
+      ignore_errors: yes
+
+    - name: RUN XVAL
+      command:
+        cmd: bash ./x-val.sh {{asmFolder}} {{json}}/{{inventory_hostname}}.json
+        chdir: ~/cryptopt/modules/scripts/misc
+      register: compare_status
+      failed_when: compare_status.rc != 0
+
+    - name: RESET FREQ
+      become: true 
+      command:
+        cmd: ./set_frequency.sh default
+        chdir: ~/cryptopt/modules/scripts/misc
+      ignore_errors: yes
+
+    - name: copy result json
+      fetch:
+        src: /tmp/comparison_results.json
+        dest: ./gathered-json/best-{{inventory_hostname}}.json
+        flat: yes
