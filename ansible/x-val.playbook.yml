@@ -27,9 +27,9 @@
         cmd: echo "1" > /proc/sys/kernel/perf_event_paranoid
 
     - name: SET FREQ
-      become: true
+      #dont use become, it'll change ~
       command:
-        cmd: ./set_frequency.sh fix {{low_freq}}
+        cmd: sudo ./set_frequency.sh fix {{low_freq}}
         chdir: ~/cryptopt/modules/scripts/misc
       ignore_errors: yes
 
@@ -41,8 +41,8 @@
       failed_when: compare_status.rc != 0
 
     - name: RESET FREQ
-      become: true 
+      #dont use become, it'll change ~
       command:
-        cmd: ./set_frequency.sh default
+        cmd: sudo ./set_frequency.sh default
         chdir: ~/cryptopt/modules/scripts/misc
       ignore_errors: yes
