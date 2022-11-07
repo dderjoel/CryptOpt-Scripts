@@ -67,7 +67,7 @@ const results = fs
         for (let i = 0; i < NO_COMPILER_SAMPLES; i++) {
           const median = Number(
             execFileSync("node", [path_to_cycle_js, filename], {
-              env: { CC: cc },
+              env: { ...process.env, CC: cc },
             }).toString()
           );
           acc[sym].push({
