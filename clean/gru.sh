@@ -29,7 +29,7 @@ set_frequency_script=$(realpath ../misc/set_frequency.sh)
 list_symbol_sort=()
 
 # load common variables
-source ./_vars .
+source ../_internal/_vars .
 
 function queue() {
   file=${1}
@@ -68,7 +68,7 @@ function await_minions() {
 }
 
 function reset_freq() {
-  sudo ${set_frequency_script} 'default'
+  sudo "${set_frequency_script}" 'default'
 }
 
 function kill_minions() {

@@ -12,7 +12,7 @@ MINION_ID=$1
 idling_file="${IDLING_PREFIX}.${MINION_ID}"
 
 # load common variables
-source ./_vars .
+source ../_internal/_vars .
 
 # keep this many asm files.
 NO_KEEP=30
