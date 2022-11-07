@@ -10,7 +10,7 @@ cd "${ROOT}"
 # this script will go through the results folder and archive the fastest N asm files of each to DEST/<DATE>
 
 # destination where to copy the files to
-dest=${DEST:-/mnt/pil/x-val/asms}/$(date -u +"%Y%m%d%H%M%S")
+dest=${DEST:-/mnt/pil/x-val/asms/$(date -u +"%Y%m%d%H%M%S")}
 mkdir -p "${dest}"
 
 # the N best files
@@ -32,8 +32,10 @@ for folder in "${res}"/*/*; do
 
   head "${infofile}" --lines "${n}" |
     # as the infofile has lines of format <CYCLECOUNT> <FILENAME> and we dont need the cyclecount, we read it into _
-    while read -r _ file; do
-      test -e "${folder}/${file}" &&
+    while read -r _ basename; do
+
+      file="${folder}/${basename}"
+      test -e "${file}" &&
         cp "${file}" "${dest}"
     done
 done
