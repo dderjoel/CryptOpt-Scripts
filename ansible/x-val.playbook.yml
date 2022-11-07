@@ -46,9 +46,3 @@
         cmd: ./set_frequency.sh default
         chdir: ~/cryptopt/modules/scripts/misc
       ignore_errors: yes
-
-    - name: copy result json
-      fetch:
-        src: /tmp/comparison_results.json
-        dest: ./gathered-json/best-{{inventory_hostname}}.json
-        flat: yes
