@@ -4,23 +4,22 @@
 - hosts: intel amd
 # - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
   become: false
-  tasks:
   vars:
     asmFolder: /mnt/pil/x-val/asms
     jsonFolder: /mnt/pil/x-val/
 
+  tasks:
     - name: MOUNT PIL
       become: true
       command: mount /mnt/pil
 
 
     - name: GATHER BEST ASMS
-      command: 
+      command:
         chdir: ~/cryptopt/modules/scripts/misc
         cmd: bash archive-fast-asm.sh
       environment:
-        DEST: {{asmFolder}}
-
+        DEST: "{{asmFolder}}"
 
     - name: enable perf_counter
       become: true
@@ -28,7 +27,7 @@
         cmd: echo "1" > /proc/sys/kernel/perf_event_paranoid
 
     - name: SET FREQ
-      become: true 
+      become: true
       command:
         cmd: ./set_frequency.sh fix {{low_freq}}
         chdir: ~/cryptopt/modules/scripts/misc
@@ -36,7 +35,7 @@
 
     - name: RUN XVAL
       command:
-        cmd: bash ./x-val.sh {{asmFolder}} {{json}}/{{inventory_hostname}}.json
+        cmd: bash ./x-val.sh "{{asmFolder}}" "{{jsonFolder}}/{{inventory_hostname}}.json"
         chdir: ~/cryptopt/modules/scripts/misc
       register: compare_status
       failed_when: compare_status.rc != 0
