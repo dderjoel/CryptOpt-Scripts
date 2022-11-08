@@ -7,7 +7,7 @@ import { execFileSync } from "child_process";
 const [_, _2, best_folder, destination_fileame] = process.argv;
 const NO_COMPILER_SAMPLES = 3; // how many compiler samples for each asm-file there should be
 const me = os.cpus()[0].model;
-// helpers
+//helpers -getOptArchFromFile
 function parseFile(filename) {
     return fs
         .readFileSync(filename)
@@ -50,7 +50,7 @@ const results = fs
     // CC's
     COMPILER.forEach((cc) => {
         for (let i = 0; i < NO_COMPILER_SAMPLES; i++) {
-            const median = Number(execFileSync("node", [path_to_cycle_js, sym], {
+            const median = Number(execFileSync("node", [path_to_cycle_js, filename], {
                 env: { ...process.env, CC: cc },
             }).toString());
             acc[sym].push({
