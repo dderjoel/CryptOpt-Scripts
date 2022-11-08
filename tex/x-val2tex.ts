@@ -414,7 +414,7 @@ function symbol2cm(sy: string): { curve: string; method: method_t } {
 }
 
 const stream = fs.createWriteStream("", { fd: 3 });
-stream.write(`\\begin{table}[t]\n`);
+stream.write(`\\begin{wraptable}{r}{0.45\\textwidth}\n`);
 stream.write(`\t\\small\n`);
 stream.write(`\t\\begin{center}\n`);
 stream.write(
@@ -455,7 +455,7 @@ Object.entries(compilerTableData).map(([curve, ratios]) => {
 stream.write(`\t\t\\bottomrule\n`);
 stream.write(`\t\t\\end{tabular}\n`);
 stream.write(`\t\\end{center}\n`);
-stream.write(`\\end{table}\n`);
+stream.write(`\\end{wraptable}\n`);
 CCs.forEach((cc, i) => {
   console.error(
     `GMLen:${GMlen}\nGM speedup for ${cc.padEnd(6)}  :${Math.pow(
