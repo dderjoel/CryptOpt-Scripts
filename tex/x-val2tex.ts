@@ -113,10 +113,16 @@ const is_compiler = (opton: string): opton is cc => /GCC|Clang/.test(opton);
 const bySymbol = fs
   .readdirSync(folder)
   .filter((f) => f.endsWith(".json"))
-  .map((file) => fs.readFileSync(resolve(folder, file)).toString())
-  .map((content) => JSON.parse(content) as CompareResult)
+  .map((file) => [fs.readFileSync(resolve(folder, file)).toString(), file])
+  .map(
+    ([content, f]) =>
+      ({ compareResult: JSON.parse(content), f } as {
+        f: string;
+        compareResult: CompareResult;
+      })
+  )
   .reduce(
-    (acc, compareResult) => {
+    (acc, { compareResult, f }) => {
       Object.entries(compareResult).forEach(([symbol, counts]) => {
         if (!(symbol in acc)) {
           acc[symbol] = {};
@@ -130,6 +136,9 @@ const bySymbol = fs
           }
           if (opton in cpu_simplename) {
             opton = cpu_simplename[opton];
+          }
+          if (f.endsWith("-cc.json") !== is_compiler(opton)) {
+            return;
           }
           if (!(opton in acc[symbol])) {
             acc[symbol][opton] = {};
