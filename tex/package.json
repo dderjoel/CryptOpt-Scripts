@@ -7,6 +7,7 @@
     "@types/lodash": "^4.14.187",
     "@types/node": "^18.11.9",
     "lodash": "^4.17.21",
+    "simple-statistics": "^7.8.0",
     "ts-node": "^10.9.1"
   }
 }
