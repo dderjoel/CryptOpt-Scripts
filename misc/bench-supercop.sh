@@ -3,8 +3,8 @@
 set -e
 dir=/mnt/pil/su/supercop-20221005/bench
 
-ansibledir=$(resolve "$(dirname "$0")/../ansible/")
-texdir=$(resolve "$(dirname "$0")/../tex/")
+ansibledir=$(realpath "$(dirname "$0")/../ansible/")
+texdir=$(realpath "$(dirname "$0")/../tex/")
 
 echo run benchmark
 pushd "${ansibledir}"
