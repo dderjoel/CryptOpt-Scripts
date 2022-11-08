@@ -15,8 +15,6 @@
       # - "--bridge manual"
       # - "--cFile ./test/manual-bridge/dettman/secp256k1_dettman_64.c"
       # - "--jsonFile ./test/manual-bridge/dettman/secp256k1_dettman_64.json"
-      # - "--cFile ./test/manual-bridge/modmul/curve25519_solinas.c"
-      # - "--jsonFile ./test/manual-bridge/modmul/curve25519_solinas.json"
 
       # example running from bitcoincore
       # - "--bridge bitcoin-core"
