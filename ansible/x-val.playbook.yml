@@ -35,7 +35,7 @@
 
     - name: RUN XVAL
       command:
-        cmd: bash ./x-val.sh "{{asmFolder}}" "{{jsonFolder}}/{{inventory_hostname}}-cc.json"
+        cmd: bash ./x-val.sh "{{asmFolder}}" "{{jsonFolder}}/{{inventory_hostname}}.json"
         chdir: ~/cryptopt/modules/scripts/misc
       register: compare_status
       failed_when: compare_status.rc != 0

@@ -37,16 +37,14 @@ const results = fs
     if (!(sym in acc)) {
         acc[sym] = [];
     }
-    // // getCyclecount for filenames
-    // const median = Number(
-    //   execFileSync("node", [path_to_cycle_js, filename]).toString()
-    // );
-    // acc[sym].push({
-    //   filename,
-    //   opton,
-    //   median,
-    //   runon: me,
-    // });
+    // getCyclecount for filenames
+    const median = Number(execFileSync("node", [path_to_cycle_js, filename]).toString());
+    acc[sym].push({
+        filename,
+        opton,
+        median,
+        runon: me,
+    });
     // CC's
     COMPILER.forEach((cc) => {
         for (let i = 0; i < NO_COMPILER_SAMPLES; i++) {
