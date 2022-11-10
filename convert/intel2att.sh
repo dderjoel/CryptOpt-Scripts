@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
+set -e
 
 namespace=0
 [[ "${1}" == "--crypto-namespace" ]] && shift && namespace=1
 
 inputfile="${1}"
 
-test -e "${inputfile}" || echo "Usage: ${0} path/to/asm/file.asm. It will be nasm'd and objdump'ed. Then result will be printed to stdout. You can use --crypto-namespace as the first argument, to wrap the symbol in 'CRYPTO_NAMESPACE(symb)'"
-test -e "${inputfile}" || exit 1
+if ! test -f "${inputfile}"; then
+  echo "Usage: ${0} path/to/asm/file.asm. It will be nasm'd and objdump'ed. Then result will be printed to stdout. You can use --crypto-namespace as the first argument, to wrap the symbol in 'CRYPTO_NAMESPACE(symb)'" >&2
+  echo ">>$1<< does not seem to be a file" >&2
+  exit 1
+fi
 
 # assemble the input
 INTERMEDIATE_FILE=$(mktemp)
