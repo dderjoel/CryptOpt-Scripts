@@ -1,0 +1,7 @@
+{
+  "name": "misc",
+  "version": "0.0.1",
+  "description": "Miscellaneous js scripts.",
+  "main": "x-val.js",
+  "type": "module"
+}
