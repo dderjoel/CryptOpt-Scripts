@@ -4,12 +4,17 @@ import path from "path";
 import { groupBy, minBy, set } from "lodash";
 
 // padding constants to have beautified latex
-const PAD_CYC = 18;
-const PAD_NAME = 35;
-const PAD_FIELD = 8;
+const PAD_CYC = 29;
+const PAD_NAME = 42;
+const PAD_FIELD = 14;
 const FACTOR: 1 | 1000 = 1000; // 1k
-const ROW_DESCRIPTION = "Implementation".padEnd(PAD_NAME);
-const FIELD_DESCRIPTION = "Lang.".padStart(PAD_FIELD);
+const ROWCOLORS = [
+  { m: "\\rowA", c: `\\cellcolor[rgb]{${Array(3).fill("0.9").join(",")}}` },
+  { m: "\\rowB", c: `\\cellcolor[rgb]{${Array(3).fill("1.0").join(",")}}` },
+];
+const macrolen = Math.min(...ROWCOLORS.map(({ m }) => m.length + 1));
+const ROW_DESCRIPTION = "Implementation".padEnd(PAD_NAME + macrolen);
+const FIELD_DESCRIPTION = "Lang.".padStart(PAD_FIELD + macrolen);
 const MEAN_DESCRIPTION = "G.M.".padStart(PAD_CYC);
 
 const NOTE = [
@@ -22,19 +27,18 @@ const NOTE = [
   "-v indicates the use of vector instructions;",
   "bin means precompiled.",
   "",
-  "\\cite{hacl} uses parallelized field arithmetic; ",
-  "All libsecp256k1 implementations are unsaturated",
+  "\\cite{hacl} uses parallelized field arithmetic",
 ].join("\n");
 
 const CAPTION = `Cost of scalar multiplication (in cycles) of different implementations benchmarking on different machines.`;
 const LABEL = "fulltable2";
 const CAPTION_MAP: {
-  [curve: string]: { heading: string };
+  [curve: string]: { heading: string; offset: string };
 } = {
-  curve25519: { heading: "Curve25519" },
-  p256: { heading: "P-256" },
-  p384: { heading: "P-384" },
-  secp256k1: { heading: "secp256k1" },
+  curve25519: { heading: "Curve25519", offset: "-2em" },
+  // p256: { heading: "P-256" },
+  // p384: { heading: "P-384" },
+  secp256k1: { heading: "secp256k1", offset: "+.6em" },
 };
 const table_start = (cap: string, label: string) =>
   [
@@ -64,21 +68,22 @@ const implOrder = [
     "crypto_scalarmult/curve25519/openssl-fe64-ots", //asm fe64
     // NOTE, there is no C fe64
     "crypto_scalarmult/curve25519/openssl-fe51-cryptopt", // fiat unsaturated       (optimized)
-    "crypto_scalarmult/curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized) using openssl's sqr
-    "crypto_scalarmult/curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C), using openssl's sqr
+    "crypto_scalarmult/curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized)
+    // "crypto_scalarmult/curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
 
-    "crypto_scalarmult/curve25519/everest-hacl-51", // asm based
-    "crypto_scalarmult/curve25519/everest-hacl-64", // C   based
-    "crypto_scalarmult/curve25519/everest-hacl-lib-51", // precompiled
-    "crypto_scalarmult/curve25519/everest-hacl-lib-64", // precompiled
+    // "crypto_scalarmult/curve25519/everest-hacl-51", // C based
+    "crypto_scalarmult/curve25519/everest-hacl-64", // asm   based
+    // "crypto_scalarmult/curve25519/everest-hacl-64-cryptopt", // asm   based but fmul2 from fiat+CO
+    // "crypto_scalarmult/curve25519/everest-hacl-lib-51", // precompiled
+    // "crypto_scalarmult/curve25519/everest-hacl-lib-64", // precompiled
 
-    "crypto_scalarmult/curve25519/openssl-fe64-w-armdazh", // https://github.com/armfazh/rfc7748_precomputed
+    // "crypto_scalarmult/curve25519/openssl-fe64-w-armdazh", // https://github.com/armfazh/rfc7748_precomputed
   ],
 
   [
     "crypto_scalarmult/secp256k1/libsecp256k1-ots", // hand assembly in field_5x52_asm_impl.h
     "crypto_scalarmult/secp256k1/libsecp256k1-c-ots",
-    "crypto_scalarmult/secp256k1/libsecp256k1-ots-c-dettman",
+    // "crypto_scalarmult/secp256k1/libsecp256k1-ots-c-dettman",
     "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-dettman",
     "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-bcc", // Case Study 2
   ],
@@ -106,27 +111,27 @@ const implMap = {
     field: "c51",
   },
   "crypto_scalarmult/curve25519/openssl-c-ots": {
-    name: "(1) OSSL ots~\\cite{openssl}",
+    name: "OSSL ots~\\cite{openssl}",
     field: "c51",
   },
   "crypto_scalarmult/curve25519/openssl-ots": {
-    name: "(2) OSSL fe-51 ots~\\cite{openssl}",
+    name: "OSSL fe-51 ots~\\cite{openssl}",
     field: "a51",
   },
   "crypto_scalarmult/curve25519/openssl-fe64-ots": {
-    name: "(3) OSSL fe-64 ots~\\cite{openssl}",
+    name: "OSSL fe-64 ots~\\cite{openssl}",
     field: "a64",
   },
   "crypto_scalarmult/curve25519/openssl-fe51-cryptopt": {
-    name: "(4) OSSL fe-51+\\textbf\\cryptopt",
+    name: "OSSL fe-51+\\textbf\\cryptopt",
     field: "a51",
   },
   "crypto_scalarmult/curve25519/openssl-fe64-cryptopt": {
-    name: "(5) OSSL fe-64+\\textbf\\cryptopt (mul only)",
+    name: "OSSL fe-64+\\textbf\\cryptopt",
     field: "a64",
   },
   "crypto_scalarmult/curve25519/openssl-fe64-fiat": {
-    name: "(6) OSSL fe-64+Fiat-C",
+    name: "OSSL fe-64+Fiat-C",
     field: "c64",
   },
   "crypto_scalarmult/curve25519/openssl-fe64-cryptopt-eql": {
@@ -138,23 +143,27 @@ const implMap = {
     field: "c64",
   },
   "crypto_scalarmult/curve25519/everest-hacl-51": {
-    name: "(7) HACL*~fe-51~\\cite{hacl}",
+    name: "HACL*~fe-51~\\cite{hacl}",
     field: "c51",
   }, // c   based
   "crypto_scalarmult/curve25519/everest-hacl-64": {
-    name: "(8) HACL*~fe-64~\\cite{hacl}",
+    name: "HACL*~fe-64~\\cite{hacl}",
     field: "a64",
   }, // asm based
+  "crypto_scalarmult/curve25519/everest-hacl-64-cryptopt": {
+    name: "HACL*~fe-64~\\cite{hacl}+\\textbf\\cryptopt (fmul2 only)",
+    field: "a64",
+  },
   "crypto_scalarmult/curve25519/everest-hacl-lib-51": {
-    name: "(9) HACL*~fe-51~\\cite{hacl}",
+    name: "HACL*~fe-51~\\cite{hacl}",
     field: "bin",
   }, // precompiled
   "crypto_scalarmult/curve25519/everest-hacl-lib-64": {
-    name: "(10) HACL*~fe-64~\\cite{hacl}",
+    name: "HACL*~fe-64~\\cite{hacl}",
     field: "bin",
   }, // precompiled
   "crypto_scalarmult/curve25519/openssl-fe64-w-armdazh": {
-    name: "(11) OSSL fe-64 + (RFC7748~\\cite{oliveira_sac2017})",
+    name: "OSSL fe-64 + (RFC7748~\\cite{oliveira_sac2017})",
     field: "a64",
   }, // https://github.com/armfazh/rfc7748_precomputed
 
@@ -180,7 +189,7 @@ const implMap = {
     field: "c52",
   },
   "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-dettman": {
-    name: "libsecp256k1+\\textbf\\cryptopt (Dettman) (mul only)",
+    name: "libsecp256k1+\\textbf\\cryptopt (mul only)",
     field: "sa",
   },
   "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-bcc": {
@@ -240,13 +249,16 @@ const genBarTable = (): string => {
   //     }}} & {\\hspace{-2mm}\\color{#3!#2}\\rule[-1pt]{#1${MAX_WIDTH_UNIT}}{6.5pt}}}
 
   const head = [
+    ...ROWCOLORS.map(({ c, m }) => `\\newcommand{${m}}{${c}}`),
     `\\begin{tabular}{cll${machineOrder.map(() => "r").join("")}r}`,
     "\\toprule",
     [
       "", // for curve column
       ROW_DESCRIPTION,
       FIELD_DESCRIPTION,
-      ...machineOrder.map((m) => machinenameMap[m].padStart(PAD_CYC)),
+      ...machineOrder.map((m) =>
+        machinenameMap[m].padStart(PAD_CYC + macrolen)
+      ),
       MEAN_DESCRIPTION,
     ].join(" & ") + "\\\\",
     "", // to get another  \\n
@@ -256,7 +268,7 @@ const genBarTable = (): string => {
     .map((implementations) => {
       // something like p256
       const folderFolder = implementations[0].split("/")[1];
-      const heading = CAPTION_MAP[folderFolder].heading;
+      const { heading, offset } = CAPTION_MAP[folderFolder];
 
       // mapped and filtered data
       const d = implementations
@@ -309,21 +321,21 @@ const genBarTable = (): string => {
 
       return [
         "\\midrule",
-        `\\multirow{${implementations.length}}{*}{\\rotatebox[origin=c]{90}{\\centering ${heading}}}`,
+        `\\multirow{${implementations.length}}{*}[${offset}]{\\rotatebox[origin=c]{90}{\\centering ${heading}}}`,
         ...d.map(
-          ({ name, byMachine, iname, field }) =>
+          ({ name, byMachine, iname, field }, i) =>
+            " & " +
             [
-              "",
               name.padEnd(PAD_NAME),
               field.padStart(PAD_FIELD),
-              ...machineOrder.map((machine) => {
-                return printCycles(
-                  byMachine[machine],
-                  smallestImplByMachine[machine]
-                );
-              }),
+              ...machineOrder.map((machine) =>
+                printCycles(byMachine[machine], smallestImplByMachine[machine])
+              ),
               printCycles(meanByImplementation[iname], smallestMean),
-            ].join(" & ") + " \\\\"
+            ]
+              .map((v) => `${ROWCOLORS[i % 2].m} ${v}`)
+              .join(" & ") +
+            " \\\\"
         ),
       ].join("\n");
     })
