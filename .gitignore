@@ -1,2 +1,4 @@
 ansible/inventory/*
-tex/node_modules
+node_modules
+.vimspector.json
+
