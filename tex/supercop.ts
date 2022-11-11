@@ -65,9 +65,9 @@ const implOrder = [
 
     "crypto_scalarmult/curve25519/openssl-c-ots", // C (fe51)
     "crypto_scalarmult/curve25519/openssl-ots", // asm (fe51)
-    "crypto_scalarmult/curve25519/openssl-fe64-ots", //asm fe64
     // NOTE, there is no C fe64
     "crypto_scalarmult/curve25519/openssl-fe51-cryptopt", // fiat unsaturated       (optimized)
+    "crypto_scalarmult/curve25519/openssl-fe64-ots", //asm fe64
     "crypto_scalarmult/curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized)
     // "crypto_scalarmult/curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
 

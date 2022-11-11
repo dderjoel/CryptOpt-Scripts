@@ -24,7 +24,7 @@
 
     - name: run bench
       command:
-        # cmd: ./bench.sh curve25519
+        # cmd: ./bench.sh secp256k1 curve25519
         cmd: ./bench.sh secp256k1
         chdir: /mnt/pil/su/supercop-20221005
 

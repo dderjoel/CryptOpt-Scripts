@@ -15,6 +15,12 @@
         force: yes
 
     - name: build
+      when: no
+      make:
+        target: deepclean
+        chdir: ~/cryptopt
+
+    - name: build
       make:
         target: all
         chdir: ~/cryptopt
