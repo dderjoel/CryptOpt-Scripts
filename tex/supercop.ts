@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import { readdirSync, readFileSync } from "fs";
-import path from "path";
 import { groupBy, minBy, set } from "lodash";
+import path from "path";
 
 // padding constants to have beautified latex
 const PAD_CYC = 29;
@@ -198,16 +198,7 @@ const implMap = {
   },
 } as { [impl: string]: { name: string; field: string } };
 
-const machineOrder = [
-  "kivsa",
-  "nakhash",
-  "aljamus",
-  "nuc",
-  "akrav",
-  "akavish",
-  "pil",
-  "arnevet",
-];
+const machineOrder = ["kivsa", "nakhash", "aljamus", "nuc", "akrav", "akavish", "pil", "arnevet"];
 
 const machinenameMap: { [hostname: string]: string } = {
   kivsa: "1900X",
@@ -256,9 +247,7 @@ const genBarTable = (): string => {
       "", // for curve column
       ROW_DESCRIPTION,
       FIELD_DESCRIPTION,
-      ...machineOrder.map((m) =>
-        machinenameMap[m].padStart(PAD_CYC + macrolen)
-      ),
+      ...machineOrder.map((m) => machinenameMap[m].padStart(PAD_CYC + macrolen)),
       MEAN_DESCRIPTION,
     ].join(" & ") + "\\\\",
     "", // to get another  \\n
@@ -310,12 +299,9 @@ const genBarTable = (): string => {
         const isSmallest = c == small;
         const ratio = (c / small).toFixed(2);
         const ratioStr = `{\\tiny (${ratio}x)}`;
-        const cyclesStr =
-          (FACTOR as number) === 1000 ? `${(c / FACTOR).toFixed(0)}k` : c;
+        const cyclesStr = (FACTOR as number) === 1000 ? `${(c / FACTOR).toFixed(0)}k` : c;
 
-        const m = isSmallest
-          ? `\\textbf{${cyclesStr} ${ratioStr}}`
-          : `${cyclesStr} ${ratioStr}`;
+        const m = isSmallest ? `\\textbf{${cyclesStr} ${ratioStr}}` : `${cyclesStr} ${ratioStr}`;
         return m.padStart(PAD_CYC);
       };
 
@@ -329,21 +315,19 @@ const genBarTable = (): string => {
               name.padEnd(PAD_NAME),
               field.padStart(PAD_FIELD),
               ...machineOrder.map((machine) =>
-                printCycles(byMachine[machine], smallestImplByMachine[machine])
+                printCycles(byMachine[machine], smallestImplByMachine[machine]),
               ),
               printCycles(meanByImplementation[iname], smallestMean),
             ]
               .map((v) => `${ROWCOLORS[i % 2].m} ${v}`)
               .join(" & ") +
-            " \\\\"
+            " \\\\",
         ),
       ].join("\n");
     })
     .join("\n\n");
 
-  const bottom = ["", "\\bottomrule", "\\end{tabular}", "\\vspace{2mm} "].join(
-    "\n"
-  );
+  const bottom = ["", "\\bottomrule", "\\end{tabular}", "\\vspace{2mm} "].join("\n");
 
   return head + meat + bottom;
 };
@@ -351,7 +335,7 @@ const genBarTable = (): string => {
 const dir = process.argv[2];
 
 const DB_REG_OK =
-  /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w\/]+) try(\(\w+placeasm:\w+\))? (?<checksum>[\w\/]+) (ok|unknown) (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) (?<impl>[-\w\/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w\/]+)/;
+  /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w/]+) try(\(\w+placeasm:\w+\))? (?<checksum>[\w/]+) (ok|unknown) (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) (?<impl>[-\w/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w/]+)/;
 // const DB_REG_CYCLES = /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w\/]+) try (?<checksum>[\w\/]+) ok (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) (?<impl>[\w\/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w\/]+)/;
 
 const data = readdirSync(dir)
@@ -361,22 +345,25 @@ const data = readdirSync(dir)
       .toString()
       .split("\n")
       .filter((line) => !line?.includes("objsize"))
-      .map((line) => DB_REG_OK.exec(line)?.groups)
+      .map((line) => DB_REG_OK.exec(line)?.groups as { impl: string; cycles: string; host: string })
       .filter((group) => group) // filter undefined
-      .map((g) => ({
-        impl: g!.impl,
-        cycles: Number(g!.cycles),
-        // cc: g!.cc,
-        // cflags: g!.cflags,
-        machine: g!.host,
+      .map(({ impl, cycles, host: machine }) => ({
+        impl,
+        cycles: Number(cycles),
+        // cc: cc,
+        // cflags: cflags,
+        machine,
       })); // just carry needed keys
 
     const grouped = groupBy(datafile, "impl");
     Object.entries(grouped).forEach(([impl, values]) => {
       // find smallest entry(from all the compiler-combinations) by cycles
-      const { cycles, machine } = minBy(values, "cycles")!;
+      const mins = minBy(values, "cycles");
+      if (!mins) {
+        throw new Error("should have mins here");
+      }
       // and add it into the accumulator
-      set(acc, `${impl}.${machine}`, cycles);
+      set(acc, `${impl}.${mins.machine}`, mins.cycles);
     });
 
     return acc;

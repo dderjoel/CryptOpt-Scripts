@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Tex-generating scripts.",
   "main": "supercop.ts",
+  "prettier": {
+    "trailingComma": "all",
+    "printWidth": 110
+  },
   "devDependencies": {
     "@types/lodash": "^4.14.187",
     "@types/node": "^18.11.9",

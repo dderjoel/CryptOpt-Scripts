@@ -18,10 +18,9 @@
  *
  *
  */
+import * as Stat from "simple-statistics";
 import fs from "fs";
 import { resolve } from "path";
-import _ from "lodash";
-import * as Stat from "simple-statistics";
 
 type savings = number[];
 type method_t = "mul" | "square";
@@ -49,7 +48,7 @@ const compilerTableData: {
 
 const NA = "N/A";
 
-let [_1, _2, folder] = process.argv;
+let [, , folder] = process.argv;
 if (!folder) {
   folder = "/mnt/pil/x-val/";
 }
@@ -123,9 +122,7 @@ const bySymbol = fs
         if (!(symbol in acc)) {
           acc[symbol] = {};
         }
-        counts.forEach((count) => {
-          // `count` is one run, where median cycles have been counted
-          let { opton, median, filename, runon } = count;
+        counts.forEach(({ opton, median, filename, runon }) => {
           if (opton in compilerMap) {
             // assign different name to opton gcc-11 -> gcc, etc
             opton = compilerMap[opton];
@@ -183,7 +180,7 @@ const writeTableheader = (symbol: string) =>
 const writeTablefooter = (symbol: string) =>
   symbol.toLowerCase().includes("square");
 
-const createCell = (ratio: number, tiny: boolean = true): string => {
+const createCell = (ratio: number, tiny = true): string => {
   // fully saturated
   const colMin = 0.9;
   const colMax = 1 / colMin;
@@ -238,7 +235,7 @@ const createCell = (ratio: number, tiny: boolean = true): string => {
       ? "white"
       : "black"
   }}`;
-  let text = ratio == even ? "    " : ratio.toFixed(2);
+  const text = ratio == even ? "    " : ratio.toFixed(2);
 
   return tiny ? `${ft}${cf}${color}$${text}$${cf}` : `${color}{$${text}$}`;
 };
@@ -437,7 +434,7 @@ stream.write(
 stream.write(`\t\t\\midrule\n`);
 
 // stream.write(`\\multicolumn{8}{c}{\\small ${curveToCaption(curve)}}\\\\\n`);
-let GMs = [1, 1];
+const GMs = [1, 1];
 let GMlen = 0;
 
 Object.entries(compilerTableData).map(([curve, ratios]) => {
