@@ -18,9 +18,9 @@
  *
  *
  */
-import * as Stat from "simple-statistics";
 import fs from "fs";
 import { resolve } from "path";
+import * as Stat from "simple-statistics";
 
 type savings = number[];
 type method_t = "mul" | "square";
@@ -79,16 +79,7 @@ const curveNameMapping: { [k: string]: string } = {
 };
 
 const GM = "G.M.";
-const cpuorder = [
-  "1900X",
-  "5800X",
-  "5950X",
-  "i7 6G",
-  "i7 10G",
-  "i9 10G",
-  "i7 11G",
-  "i9 12G",
-];
+const cpuorder = ["1900X", "5800X", "5950X", "i7 6G", "i7 10G", "i9 10G", "i7 11G", "i9 12G"];
 
 const compilerMap: { [k: string]: cc } = {
   gcc: "GCC",
@@ -156,7 +147,7 @@ const bySymbol = fs
           }[];
         };
       };
-    }
+    },
   );
 
 const ft = `\\fontsize{5}{7}\\selectfont`;
@@ -175,10 +166,8 @@ const scale = 1;
 function ratioAdjust(ratio: number): number {
   return ratio / scale;
 }
-const writeTableheader = (symbol: string) =>
-  symbol.toLowerCase().includes("mul");
-const writeTablefooter = (symbol: string) =>
-  symbol.toLowerCase().includes("square");
+const writeTableheader = (symbol: string) => symbol.toLowerCase().includes("mul");
+const writeTablefooter = (symbol: string) => symbol.toLowerCase().includes("square");
 
 const createCell = (ratio: number, tiny = true): string => {
   // fully saturated
@@ -227,14 +216,8 @@ const createCell = (ratio: number, tiny = true): string => {
     cellFactor = y;
     // cellcolor = ratio < 1 ? "red" : ratio > 1 ? "darkgreen" : "lightgray";
   }
-  let color = `\\cellcolor{${cellcolor.padStart(9)}!${cellFactor
-    .toFixed(0)
-    .padEnd(3)}}`;
-  color += `\\color{${
-    cellFactor > 50 && cellcolor !== col100 && cellcolor == colgood
-      ? "white"
-      : "black"
-  }}`;
+  let color = `\\cellcolor{${cellcolor.padStart(9)}!${cellFactor.toFixed(0).padEnd(3)}}`;
+  color += `\\color{${cellFactor > 50 && cellcolor !== col100 && cellcolor == colgood ? "white" : "black"}}`;
   const text = ratio == even ? "    " : ratio.toFixed(2);
 
   return tiny ? `${ft}${cf}${color}$${text}$${cf}` : `${color}{$${text}$}`;
@@ -261,23 +244,17 @@ Object.entries(bySymbol)
       console.log(
         `\t\\begin{tabular}{ @{}r ${Array(numberOfColumns - 1 /*no opton*/)
           .fill("c")
-          .join("")}}`
+          .join("")}}`,
       );
       console.log(`\t\t\\addlinespace[-.5em]`); // to squeeze into pageheight
-      console.log(
-        `\t\t\\multicolumn{${numberOfColumns}}{c}{\\small ${curveToCaption(
-          symbol
-        )}}\\\\`
-      );
+      console.log(`\t\t\\multicolumn{${numberOfColumns}}{c}{\\small ${curveToCaption(symbol)}}\\\\`);
       console.log(`\t\t\\cmidrule{1-${numberOfColumns}}`);
 
       const header0 = `\t\t${ft} run~on & ${cpuorder
         .concat(GM)
         .map((m) => `${ft}\\rotatebox{90}{${m}}`)
         .join(" & ")}\\\\`;
-      const header1 = `\t\t${ft} opt~on ${Array(numberOfColumns)
-        .fill(" ")
-        .join("&")}\\\\`;
+      const header1 = `\t\t${ft} opt~on ${Array(numberOfColumns).fill(" ").join("&")}\\\\`;
       console.log(header0);
       console.log("\t\t\\addlinespace[+.2em]\n");
       console.log(header1);
@@ -296,9 +273,7 @@ Object.entries(bySymbol)
         console.log(`\t\t\\addlinespace[.1em]\n`);
       }
 
-      const allOptimistionRunsForCurrentRow = Object.values(
-        optOnStructure[y_opton]
-      ).flatMap((runs) => runs);
+      const allOptimistionRunsForCurrentRow = Object.values(optOnStructure[y_opton]).flatMap((runs) => runs);
 
       // first col
       const firstCol = ` ${y_opton}`;
@@ -343,25 +318,17 @@ Object.entries(bySymbol)
         return ratio;
       });
 
-      const gm = Stat.geometricMean(
-        restColRatios.filter((r) => typeof r === "number") as number[]
-      );
+      const gm = Stat.geometricMean(restColRatios.filter((r) => typeof r === "number") as number[]);
 
       // res
-      const restCols = restColRatios
-        .concat(gm)
-        .map((r) => (typeof r === "number" ? createCell(r) : r));
+      const restCols = restColRatios.concat(gm).map((r) => (typeof r === "number" ? createCell(r) : r));
 
-      console.log(
-        `\t\t${ft}${firstCol.padEnd(7)} & ${restCols.join(" & ")} \\\\`
-      );
+      console.log(`\t\t${ft}${firstCol.padEnd(7)} & ${restCols.join(" & ")} \\\\`);
     });
     console.log(`\t\t\\addlinespace[.1em]`);
 
     // final row
-    const finalRatios = bestAsmPerMachine
-      .map((cycle, i) => bestCcPerMachine[i] / cycle)
-      .map(ratioAdjust);
+    const finalRatios = bestAsmPerMachine.map((cycle, i) => bestCcPerMachine[i] / cycle).map(ratioAdjust);
 
     console.log(
       // `\\midrule
@@ -369,7 +336,7 @@ Object.entries(bySymbol)
         .concat(Stat.geometricMean(finalRatios))
         .map((r) => createCell(r))
         .join(" & ")} \\\\
-      `
+      `,
     );
 
     if (writeTablefooter(symbol)) {
@@ -382,11 +349,7 @@ Object.entries(bySymbol)
 
 console.log(`\\end{table*}`);
 
-function addToCompilerTableData(
-  symbol: string,
-  compiler: cc,
-  ratio: number
-): void {
+function addToCompilerTableData(symbol: string, compiler: cc, ratio: number): void {
   const { curve, method } = symbol2cm(symbol);
   if (!(curve in compilerTableData))
     compilerTableData[curve] = {
@@ -416,21 +379,13 @@ const stream = fs.createWriteStream("", { fd: 3 });
 stream.write(`\\begin{wraptable}{r}{0.45\\textwidth}\n`);
 stream.write(`\t\\small\n`);
 stream.write(`\t\\begin{center}\n`);
-stream.write(
-  `\t\\caption{Geometric means of \\cryptopt vs.\\ off-the-shelf compilers.}\n`
-);
+stream.write(`\t\\caption{Geometric means of \\cryptopt vs.\\ off-the-shelf compilers.}\n`);
 stream.write(`\t\\label{tab:res-avg}\n`);
 stream.write(`\t\t\\begin{tabular}{@{}lccccc}\n`);
 stream.write(`\t\t\\toprule\n`);
-stream.write(
-  `\t\t\t      & \\multicolumn{2}{c}{Multiply} & & \\multicolumn{2}{c}{Square}\\\\\n`
-);
-stream.write(
-  `\t\t\t                \\cmidrule{2-3}                  \\cmidrule{5-6} \n`
-);
-stream.write(
-  `\t\t\tCurve & ${MS.flatMap((_) => CCs.join(" & ")).join(" & & ")} \\\\\n`
-);
+stream.write(`\t\t\t      & \\multicolumn{2}{c}{Multiply} & & \\multicolumn{2}{c}{Square}\\\\\n`);
+stream.write(`\t\t\t                \\cmidrule{2-3}                  \\cmidrule{5-6} \n`);
+stream.write(`\t\t\tCurve & ${MS.flatMap((_) => CCs.join(" & ")).join(" & & ")} \\\\\n`);
 stream.write(`\t\t\\midrule\n`);
 
 // stream.write(`\\multicolumn{8}{c}{\\small ${curveToCaption(curve)}}\\\\\n`);
@@ -456,10 +411,5 @@ stream.write(`\t\t\\end{tabular}\n`);
 stream.write(`\t\\end{center}\n`);
 stream.write(`\\end{wraptable}\n`);
 CCs.forEach((cc, i) => {
-  console.error(
-    `GMLen:${GMlen}\nGM speedup for ${cc.padEnd(6)}  :${Math.pow(
-      GMs[i],
-      1 / GMlen
-    ).toFixed(4)}`
-  );
+  console.error(`GMLen:${GMlen}\nGM speedup for ${cc.padEnd(6)}  :${Math.pow(GMs[i], 1 / GMlen).toFixed(4)}`);
 });

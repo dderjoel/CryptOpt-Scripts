@@ -290,7 +290,7 @@ const genBarTable = (): string => {
       const smallestMean = Math.min(...Object.values(meanByImplementation));
 
       const smallestImplByMachine = machineOrder.reduce((acc, machine) => {
-        const min = Math.min(...d.map(({ byMachine }) => byMachine[machine]!));
+        const min = Math.min(...d.map(({ byMachine }) => byMachine[machine]));
         acc[machine] = min;
         return acc;
       }, {} as { [machine: string]: number });
