@@ -14,6 +14,7 @@
           - tmux
           - make
           - llvm
+          - g++
             # for gnuplot w/o x11
           - gnuplot-nox
             # for pdfunite
