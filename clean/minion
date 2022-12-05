@@ -59,10 +59,11 @@ function process_asmfile() {
   fi
 
   log "${cmd}"
-  cycl=$(eval "${cmd}")
+  #cycle check unused at the moment
+  read -r cycl_asm _cycl_check < <(eval "${cmd}")
 
-  [[ -z "${cycl}" ]] && log "ERROR. CountCycle.js did not return a string." && return
-  line=$(printf "%s %s\n" "${cycl}" "$(basename "${asm}")")
+  [[ -z "${cycl_asm}" ]] && log "ERROR. CountCycle.js did not return a string." && return
+  line=$(printf "%s %s\n" "${cycl_asm}" "$(basename "${asm}")")
 
   infofile="$(dirname "${asm}")/${INFO_FILE_WIP}"
   log "$line >> ${infofile}"
