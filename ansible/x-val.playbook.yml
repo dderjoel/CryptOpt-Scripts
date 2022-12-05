@@ -4,6 +4,8 @@
 - hosts: intel amd
 # - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
   become: false
+    # fail entire playbook, if any host fails (esp. the touch command)
+  any_errors_fatal: true
   vars:
     asmFolder: /mnt/pil/x-val/asms
     jsonFolder: /mnt/pil/x-val/
@@ -13,6 +15,11 @@
       become: true
       command: mount /mnt/pil
 
+    - name: touch output file to check permissions
+      command:
+        cmd: touch "{{jsonFolder}}/{{inventory_hostname}}.json"
+      register: compare_status
+      failed_when: compare_status.rc != 0
 
     - name: GATHER BEST ASMS
       command:
