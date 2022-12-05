@@ -57,11 +57,13 @@ const cpu_simplename: { [key: string]: string } = {
   "AMD Ryzen Threadripper 1900X 8-Core Processor": "1900X",
   "AMD Ryzen 7 5800X 8-Core Processor": "5800X",
   "AMD Ryzen 9 5950X 16-Core Processor": "5950X",
+  "AMD Ryzen 9 7950X 16-Core Processor": "7950X",
   "Intel(R) Core(TM) i7-6770HQ CPU @ 2.60GHz": "i7 6G",
   "Intel(R) Core(TM) i7-10710U CPU @ 1.10GHz": "i7 10G",
   "Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz": "i9 10G",
   "11th Gen Intel(R) Core(TM) i7-11700KF @ 3.60GHz": "i7 11G",
   "12th Gen Intel(R) Core(TM) i9-12900KF": "i9 12G",
+  "13th Gen Intel(R) Core(TM) i9-13900KF": "i9 13G",
 };
 
 const curveNameMapping: { [k: string]: string } = {
@@ -79,7 +81,18 @@ const curveNameMapping: { [k: string]: string } = {
 };
 
 const GM = "G.M.";
-const cpuorder = ["1900X", "5800X", "5950X", "i7 6G", "i7 10G", "i9 10G", "i7 11G", "i9 12G"];
+const cpuorder = [
+  "1900X",
+  "5800X",
+  "5950X",
+  "7950X",
+  "i7 6G",
+  "i7 10G",
+  "i9 10G",
+  "i7 11G",
+  "i9 12G",
+  "i9 13G",
+];
 
 const compilerMap: { [k: string]: cc } = {
   gcc: "GCC",
@@ -154,8 +167,8 @@ const ft = `\\fontsize{5}{7}\\selectfont`;
 const cf = "\\rule{-.5em}{0em}"; // makes the cell smaller in width
 console.log(`\\renewcommand{\\arraystretch}{0.45}`);
 console.log(`\\begin{table*}\\centering`);
-console.log(`\\caption{Optimization results. We show the relative improvements in \\% for the multiplication (top) and squaring (bottom) operations; time savings are marked in blue. 
-First, to observe hardware-specific optimization, the 8-by-8 matrix shows the performance the optimized operation that have been optimized on one machine and then run on another. 
+console.log(`\\caption{\\tiny Optimization results. We show the relative improvements in \\% for the multiplication (top) and squaring (bottom) operations; time savings are marked in blue. 
+First, to observe hardware-specific optimization, the 10-by-10 matrix shows the performance the optimized operation that have been optimized on one machine and then run on another. 
 The subsequent two rows (Clang/GCC) then show the time savings of our optimized operations over off-the-shelf-compilers.
 Lastly, \`\`Final'' shows the time savings of our best-performing implementation over the best-performing compiler-generated version.
 }
@@ -240,7 +253,7 @@ Object.entries(bySymbol)
 
     if (writeTableheader(symbol)) {
       // COLUMN DEFINITION
-      console.log(`\t\\setlength{\\tabcolsep}{4pt}`);
+      console.log(`\t\\setlength{\\tabcolsep}{2.9px}`);
       console.log(
         `\t\\begin{tabular}{ @{}r ${Array(numberOfColumns - 1 /*no opton*/)
           .fill("c")
@@ -273,6 +286,10 @@ Object.entries(bySymbol)
         console.log(`\t\t\\addlinespace[.1em]\n`);
       }
 
+      if (!(y_opton in optOnStructure)) {
+        console.warn(`${y_opton} should be present in ${symbol}'s optOnStructure`);
+        return `${ft}${cf}${NA}`;
+      }
       const allOptimistionRunsForCurrentRow = Object.values(optOnStructure[y_opton]).flatMap((runs) => runs);
 
       // first col
@@ -281,8 +298,15 @@ Object.entries(bySymbol)
       const restColRatios = cpuorder.map((col, i) => {
         // col is a cpu like "1900X" on which we run on
 
+        // if 'col' is not in optOnStructure, we  don't have reference
+        // that happens if there was no optimisation for current `symbol` from machine `col`
+        let reference = [] as number[];
+        if (!(col in optOnStructure)) {
+          console.warn(`${col} should be present in ${symbol}'s optOnStructure`);
+          return `${ft}${cf}${NA}`;
+        }
         // the reference is all those implementations which are optimised and run on the current col
-        const reference = Object.values(optOnStructure[col])
+        reference = Object.values(optOnStructure[col])
           .flatMap((runs) => runs)
           .filter(({ ranOn }) => ranOn == col)
           .map(({ cycles }) => cycles);
@@ -318,7 +342,14 @@ Object.entries(bySymbol)
         return ratio;
       });
 
-      const gm = Stat.geometricMean(restColRatios.filter((r) => typeof r === "number") as number[]);
+      // getting the gm for the row
+      let gm: number | string;
+      try {
+        gm = Stat.geometricMean(restColRatios.filter((r) => typeof r === "number") as number[]);
+      } catch (e) {
+        gm = `${ft}${cf}${NA}`;
+        console.warn(`cannot calculate ${symbol}-${y_opton} mean`);
+      }
 
       // res
       const restCols = restColRatios.concat(gm).map((r) => (typeof r === "number" ? createCell(r) : r));
@@ -329,13 +360,18 @@ Object.entries(bySymbol)
 
     // final row
     const finalRatios = bestAsmPerMachine.map((cycle, i) => bestCcPerMachine[i] / cycle).map(ratioAdjust);
+    let finalGm: number | string;
+    try {
+      finalGm = Stat.geometricMean(finalRatios.filter((r) => typeof r === "number") as number[]);
+      finalGm = createCell(finalGm);
+    } catch (e) {
+      finalGm = `${ft}${cf}${NA}`;
+      console.warn(`cannot calculate ${symbol}-Final mean`);
+    }
 
     console.log(
       // `\\midrule
-      `\t\t${ft} Final  & ${finalRatios
-        .concat(Stat.geometricMean(finalRatios))
-        .map((r) => createCell(r))
-        .join(" & ")} \\\\
+      `\t\t${ft} Final  & ${finalRatios.map((r) => createCell(r)).join(" & ")} & ${finalGm} \\\\
       `,
     );
 
