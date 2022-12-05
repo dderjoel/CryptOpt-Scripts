@@ -50,6 +50,9 @@ function count_alive_minions() {
   done < <(pgrep --full --list-full --ignore-case 'minion [0-f]+')
   # the pgrep command results a list of the form "<PID> bash minion <MINION_ID>\n"
   # for each active minion.
+
+  # every proc has one child so we need to take half
+  alive=$((alive / 2))
   printf "\r%02d minions working hard:/" "${alive}"
   return "${alive}"
 }
