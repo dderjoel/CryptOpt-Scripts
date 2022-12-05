@@ -18,8 +18,9 @@ Ansible can be used to run all the experiments and evaluations on the machines c
 | `clean~`               | After a 'session' is completed, there are many result files. This mux-session will re-evaluate the most promising ones thoroughly and caches the results in a `.last_clean_run`-file in every result folder. More info in `templates/clean.mux.j2` and `../clean/`| 
 | `update~`              | Pretty much an `sudo apt update && sudo apt upgrade -y`| 
 | `wilson~`              | Pretty much a local loop through `curves` which are then "session'ed". |  
-| `just-end-everything~` | Ends all Wilson's and CryptOpt's. |  
+| `just-end-everything~` | Ends all Wilsons and CryptOpts. |  
 | `bench-supercop~`      | Mounts pil and runs the supercop benchmark. Will not pull supercop. |  
+| `x-val~`               | Mounts pil, archives best asms, runs `x-val.sh`. Run `../tex/x-val2tex.ts 3>&1` locally after. |  
 
 Key: (`~`: `.playbook.yaml` )
 
