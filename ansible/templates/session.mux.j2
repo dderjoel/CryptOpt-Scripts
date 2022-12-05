@@ -30,8 +30,8 @@ IFS=' ' read -ra masks <<<"{{ cpumasklist | default(1)  }}"
 # and for every cpu start one proc
 for mask in "${masks[@]}"; do
   tmux split-pane bash
-  # if using split-pane ./run.sh ..., the pane closes once the command finished.
-  tmux send-keys "CC=${CC} taskset ${mask} ${wd}/run.sh ${runArgs} --seed $(date +%N) " C-m
+  # if using split-pane ./CryptOpt ..., the pane closes once the command finished.
+  tmux send-keys "CC=${CC} taskset ${mask} ${wd}/CryptOpt ${runArgs} --seed $(date +%N) " C-m
   tmux select-layout even-vertical
 done
 
