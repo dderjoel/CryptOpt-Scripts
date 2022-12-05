@@ -15,6 +15,7 @@
           - make
           - llvm
           - g++
+          - clang
             # for gnuplot w/o x11
           - gnuplot-nox
             # for pdfunite
