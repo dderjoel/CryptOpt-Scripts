@@ -8,7 +8,6 @@ import * as path from "path";
 //////node, x-val.js ...
 const [, , best_folder, destination_fileame] = process.argv;
 
-const NO_COMPILER_SAMPLES = 3; // how many compiler samples for each asm-file there should be
 const me = os.cpus()[0].model;
 
 //helpers -getOptArchFromFile
@@ -49,30 +48,29 @@ const results = fs
         acc[sym] = [];
       }
 
-      // getCyclecount for filenames
-      const median = Number(execFileSync("node", [path_to_cycle_js, filename]).toString());
-      acc[sym].push({
-        filename,
-        opton,
-        median,
-        runon: me,
-      });
-
-      // CC's
+      // getCyclecount for filenames and CCs
       COMPILER.forEach((cc) => {
-        for (let i = 0; i < NO_COMPILER_SAMPLES; i++) {
-          const median = Number(
-            execFileSync("node", [path_to_cycle_js, filename], {
-              env: { ...process.env, CC: cc },
-            }).toString(),
-          );
-          acc[sym].push({
-            filename: `${i}NA`,
-            opton: cc,
-            median,
-            runon: me,
-          });
-        }
+        // Measure
+        const [medianAsm, medianCheck] = execFileSync("node", [path_to_cycle_js, filename], {
+          env: { ...process.env, CC: cc },
+        })
+          .toString()
+          .split(" ")
+          .map((s) => Number(s));
+
+        acc[sym].push({
+          filename,
+          opton,
+          median: medianAsm,
+          runon: me,
+        });
+
+        acc[sym].push({
+          filename: `${cc}NA`,
+          opton: cc,
+          median: medianCheck,
+          runon: me,
+        });
       });
       return acc;
     },
