@@ -21,6 +21,7 @@
       - "--evals 200k"
       - "--bets 20"
       - "--betRatio 0.1"
+      - "--resultDir ~/cryptopt/results.wilson.{{ansible_date_time.iso8601_basic_short}}"
       # - "--no-proof"
 
   tasks:

@@ -25,6 +25,7 @@
       - "--bets 20"
       - "--betRatio 0.1"
       # - "--no-proof"
+      - "--resultDir ~/cryptopt/results.wilson.{{ansible_date_time.iso8601_basic_short}}"
 
   tasks:
     - name: ensure session.mux is up to date

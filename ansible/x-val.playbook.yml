@@ -8,7 +8,8 @@
   any_errors_fatal: true
   vars:
     asmFolder: /mnt/pil/x-val/asms
-    jsonFolder: /mnt/pil/x-val/
+    jsonFolder: /mnt/pil/x-val
+    resultDir: "/home/joel/cryptopt/results.wilson.20230113T141423"
 
   tasks:
     - name: MOUNT PIL
@@ -17,7 +18,8 @@
 
     - name: touch output file to check permissions
       command:
-        cmd: touch "{{jsonFolder}}/{{inventory_hostname}}.json"
+        cmd: touch "{{jsonFolder}}/{{inventory_hostname}}.json" && touch "{{asmFolder}}/{{inventory_hostname}}.touch"
+
       register: compare_status
       failed_when: compare_status.rc != 0
 
@@ -26,6 +28,7 @@
         chdir: ~/cryptopt/modules/scripts/misc
         cmd: bash archive-fast-asm.sh
       environment:
+        RES: "{{resultDir}}"
         DEST: "{{asmFolder}}"
 
     - name: enable perf_counter

@@ -26,7 +26,7 @@ echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
 
 tmux select-layout even-vertical
 tmux split-pane bash
-tmux send-keys "CPUMASK='${mask}' FREQ='${freq}' SYMBOL='${SYMBOL}' ~/cryptopt/modules/scripts/clean/gru.sh | tee -a ~/cryptopt/modules/scripts/clean/gru.log" C-m
+tmux send-keys "CPUMASK='${mask}' FREQ='${freq}' RES='${RES}' SYMBOL='${SYMBOL}' ~/cryptopt/modules/scripts/clean/gru.sh | tee -a ~/cryptopt/modules/scripts/clean/gru.log" C-m
 
 tmux select-layout even-vertical
 tmux split-pane bash
