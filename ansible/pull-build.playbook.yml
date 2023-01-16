@@ -6,6 +6,13 @@
   become: false
   gather_facts: false
   tasks:
+    - name: RESET FREQ
+      when: no
+      #dont use become, it'll change ~
+      command:
+        cmd: sudo ./set_frequency.sh default
+        chdir: ~/cryptopt/modules/scripts/misc
+      ignore_errors: yes
     - name: Update git repo
       git:
         repo: 'https://github.com/0xADE1A1DE/CryptOpt.git'
