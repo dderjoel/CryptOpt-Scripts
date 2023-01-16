@@ -5,6 +5,9 @@
 - hosts: intel amd
   vars:
     CC: clang
+    # apparently ansible resolves each of those everytime it launches a run, which results in some reuslts being in ~00 and some in ~01, one second apart.
+    # I'm trying here to blank out seconds. thereby this only occurs once a minute, not once per second...
+    date: "{{ansible_date_time.iso}}{{ansible_date_time.month}}{{ansible_date_time.day}}T{{ansible_date_time.hour}}{{ansible_date_time.minute}}00"
     runArgs:
       # example running from fiat
       - "--bridge fiat"
@@ -25,7 +28,7 @@
       - "--bets 20"
       - "--betRatio 0.1"
       # - "--no-proof"
-      - "--resultDir ~/cryptopt/results.wilson.{{ansible_date_time.iso8601_basic_short}}"
+      - "--resultDir ~/cryptopt/results.fmul2.{{date}}"
 
   tasks:
     - name: ensure session.mux is up to date
