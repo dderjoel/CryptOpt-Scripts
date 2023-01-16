@@ -88,12 +88,15 @@ function fix {
     set_gov userspace
     for p in "${base}"cpu*/cpufreq; do
       # check if we got a freq, and if so, if it is available.
-      if test -n "${1}" && grep -q "${1}" "${p}/scaling_available_frequencies"; then
+      if test -n "${1}" -a -r "${p}/scaling_available_frequencies" && grep -q "${1}" "${p}/scaling_available_frequencies"; then
         # if so, use it
         f="${1}"
-      else
-        # otherwise, use the last (i.e. lowest) available
+        # otherwise, use the last (i.e. lowest) available (if there some check?)
+      elif test -r "${p}/scaling_available_frequencies"; then
         f=$(awk '{ print $NF }' "${p}/scaling_available_frequencies")
+      else
+        f="${p}/cpuinfo_min_freq"
+
       fi
       # and write that to the sysfs
       echo "${f}" >"${p}/scaling_setspeed"
