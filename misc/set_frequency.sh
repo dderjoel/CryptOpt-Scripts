@@ -95,8 +95,7 @@ function fix {
       elif test -r "${p}/scaling_available_frequencies"; then
         f=$(awk '{ print $NF }' "${p}/scaling_available_frequencies")
       else
-        f="${p}/cpuinfo_min_freq"
-
+        f=$(<"${p}/cpuinfo_min_freq")
       fi
       # and write that to the sysfs
       echo "${f}" >"${p}/scaling_setspeed"
