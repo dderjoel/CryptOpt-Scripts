@@ -253,7 +253,7 @@ Object.entries(bySymbol)
 
     if (writeTableheader(symbol)) {
       // COLUMN DEFINITION
-      console.log(`\t\\setlength{\\tabcolsep}{2.9px}`);
+      console.log(`\t\\setlength{\\tabcolsep}{2.7px}`);
       console.log(
         `\t\\begin{tabular}{ @{}r ${Array(numberOfColumns - 1 /*no opton*/)
           .fill("c")
