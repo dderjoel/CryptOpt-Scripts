@@ -198,17 +198,30 @@ const implMap = {
   },
 } as { [impl: string]: { name: string; field: string } };
 
-const machineOrder = ["kivsa", "nakhash", "aljamus", "nuc", "akrav", "akavish", "pil", "arnevet"];
+const machineOrder = [
+  "kivsa",
+  "nakhash",
+  "aljamus",
+  "dag",
+  "nuc",
+  "akrav",
+  "akavish",
+  "pil",
+  "arnevet",
+  "ez",
+];
 
 const machinenameMap: { [hostname: string]: string } = {
   kivsa: "1900X",
   nakhash: "5800X",
   aljamus: "5950X",
+  dag: "7950X",
   nuc: "i7 6G",
   akrav: "i7 10G",
   akavish: "i9 10G",
   pil: "i7 11G",
   arnevet: "i9 12G",
+  ez: "i9 13G",
 };
 const languageMap: { [secificImplName: string]: string } = {
   "c port": "C",
