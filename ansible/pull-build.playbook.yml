@@ -14,8 +14,8 @@
         update: yes
         force: yes
 
-    - name: build
-      when: no
+    - name: deepclean
+      when: yes
       make:
         target: deepclean
         chdir: ~/cryptopt
@@ -24,8 +24,5 @@
       make:
         target: all
         chdir: ~/cryptopt
-
-
-
 
 
