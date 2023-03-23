@@ -15,6 +15,8 @@
     - name: Upgrade apt packages
       apt:
         upgrade: dist
+        autoremove: true
+        autoclean: true
     - name: Check if a reboot is needed for Debian and Ubuntu boxes
       register: reboot_required_file
       stat:
