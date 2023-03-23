@@ -25,7 +25,7 @@ const NOTE = [
   "ots stands for off-the-shelf;",
   "asm means assembly;",
   "-v indicates the use of vector instructions;",
-  "bin means precompiled.",
+  // "bin means precompiled.",
   "",
   "\\cite{hacl} uses parallelized field arithmetic",
 ].join("\n");
@@ -57,145 +57,66 @@ const TABLE_END = `${NOTE}\n\\end{sidewaystable}\n`;
 
 const implOrder = [
   [
-    "crypto_scalarmult/curve25519/sandy2x", // vector in ladder_base.S
-    "crypto_scalarmult/curve25519/amd64-64", // scalar asm; fe64 no vector
-    "crypto_scalarmult/curve25519/amd64-51", // scalar asm; fe51 no vector
-    "crypto_scalarmult/curve25519/donna", // uses vectors in asm.S
-    "crypto_scalarmult/curve25519/donna_c64", // C (fe51)
-
-    "crypto_scalarmult/curve25519/openssl-c-ots", // C (fe51)
-    "crypto_scalarmult/curve25519/openssl-ots", // asm (fe51)
+    "curve25519/sandy2x", // vector in ladder_base.S
+    "curve25519/amd64-64", // scalar asm; fe64 no vector
+    "curve25519/amd64-51", // scalar asm; fe51 no vector
+    "curve25519/donna", // uses vectors in asm.S
+    "curve25519/donna_c64", // C (fe51)
+    "curve25519/openssl-c-ots", // C (fe51)
+    "curve25519/openssl-ots", // asm (fe51)
     // NOTE, there is no C fe64
-    "crypto_scalarmult/curve25519/openssl-fe51-cryptopt", // fiat unsaturated       (optimized)
-    "crypto_scalarmult/curve25519/openssl-fe64-ots", //asm fe64
-    "crypto_scalarmult/curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized)
-    // "crypto_scalarmult/curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
+    "curve25519/openssl-fe51-cryptopt", // fiat unsaturated       (optimized)
+    "curve25519/openssl-fe64-ots", //asm fe64
+    "curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized)
+    // "curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
 
-    // "crypto_scalarmult/curve25519/everest-hacl-51", // C based
-    "crypto_scalarmult/curve25519/everest-hacl-64", // asm   based
-    // "crypto_scalarmult/curve25519/everest-hacl-64-cryptopt", // asm   based but fmul2 from fiat+CO
-    // "crypto_scalarmult/curve25519/everest-hacl-lib-51", // precompiled
-    // "crypto_scalarmult/curve25519/everest-hacl-lib-64", // precompiled
+    // "curve25519/everest-hacl-51", // C based
+    "curve25519/everest-hacl-64", // asm   based
+    // "curve25519/everest-hacl-64-cryptopt", // asm   based but fmul2 from fiat+CO
+    // "curve25519/everest-hacl-lib-51", // precompiled
+    // "curve25519/everest-hacl-lib-64", // precompiled
 
-    // "crypto_scalarmult/curve25519/openssl-fe64-w-armdazh", // https://github.com/armfazh/rfc7748_precomputed
+    // "curve25519/openssl-fe64-w-armdazh", // https://github.com/armfazh/rfc7748_precomputed
   ],
 
   [
-    "crypto_scalarmult/secp256k1/libsecp256k1-ots", // hand assembly in field_5x52_asm_impl.h
-    "crypto_scalarmult/secp256k1/libsecp256k1-c-ots",
-    // "crypto_scalarmult/secp256k1/libsecp256k1-ots-c-dettman",
-    "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-dettman",
-    "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-bcc", // Case Study 2
+    "secp256k1/libsecp256k1-ots", // hand assembly in field_5x52_asm_impl.h
+    "secp256k1/libsecp256k1-c-ots",
+    // "secp256k1/libsecp256k1-ots-c-dettman",
+    "secp256k1/libsecp256k1-ots-cryptopt-dettman",
+    "secp256k1/libsecp256k1-ots-cryptopt-bcc", // Case Study 2
   ],
 ];
 const implMap = {
   // CURVE25519
-  "crypto_scalarmult/curve25519/sandy2x": {
-    name: "sandy2x~\\cite{sandy2x}",
-    field: "av",
-  },
-  "crypto_scalarmult/curve25519/amd64-51": {
-    name: "amd64-51~\\cite{Chen14}",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/amd64-64": {
-    name: "amd64-64~\\cite{Chen14}",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/donna": {
-    name: "donna~\\cite{curve25519-donna}",
-    field: "av",
-  },
-  "crypto_scalarmult/curve25519/donna_c64": {
-    name: "donna-c64~\\cite{curve25519-donna}",
-    field: "c51",
-  },
-  "crypto_scalarmult/curve25519/openssl-c-ots": {
-    name: "OSSL ots~\\cite{openssl}",
-    field: "c51",
-  },
-  "crypto_scalarmult/curve25519/openssl-ots": {
-    name: "OSSL fe-51 ots~\\cite{openssl}",
-    field: "a51",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe64-ots": {
-    name: "OSSL fe-64 ots~\\cite{openssl}",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe51-cryptopt": {
-    name: "OSSL fe-51+\\textbf\\cryptopt",
-    field: "a51",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe64-cryptopt": {
-    name: "OSSL fe-64+\\textbf\\cryptopt",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe64-fiat": {
-    name: "OSSL fe-64+Fiat-C",
-    field: "c64",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe64-cryptopt-eql": {
-    name: "OSSL 64+\\textbf\\cryptopt(mul as sq)",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/openssl-fe64-fiat-eql": {
-    name: "OSSL 64+Fiat-C (mul as sq)",
-    field: "c64",
-  },
-  "crypto_scalarmult/curve25519/everest-hacl-51": {
-    name: "HACL*~fe-51~\\cite{hacl}",
-    field: "c51",
-  }, // c   based
-  "crypto_scalarmult/curve25519/everest-hacl-64": {
-    name: "HACL*~fe-64~\\cite{hacl}",
-    field: "a64",
-  }, // asm based
-  "crypto_scalarmult/curve25519/everest-hacl-64-cryptopt": {
-    name: "HACL*~fe-64~\\cite{hacl}+\\textbf\\cryptopt (fmul2 only)",
-    field: "a64",
-  },
-  "crypto_scalarmult/curve25519/everest-hacl-lib-51": {
-    name: "HACL*~fe-51~\\cite{hacl}",
-    field: "bin",
-  }, // precompiled
-  "crypto_scalarmult/curve25519/everest-hacl-lib-64": {
-    name: "HACL*~fe-64~\\cite{hacl}",
-    field: "bin",
-  }, // precompiled
-  "crypto_scalarmult/curve25519/openssl-fe64-w-armdazh": {
-    name: "OSSL fe-64 + (RFC7748~\\cite{oliveira_sac2017})",
-    field: "a64",
-  }, // https://github.com/armfazh/rfc7748_precomputed
+  "curve25519/sandy2x": { name: "sandy2x~\\cite{sandy2x}", field: "av" },
+  "curve25519/amd64-51": { name: "amd64-51~\\cite{Chen14}", field: "a64" },
+  "curve25519/amd64-64": { name: "amd64-64~\\cite{Chen14}", field: "a64" },
+  "curve25519/donna": { name: "donna~\\cite{curve25519-donna}", field: "av" },
+  "curve25519/donna_c64": { name: "donna-c64~\\cite{curve25519-donna}", field: "c51" },
+  "curve25519/openssl-c-ots": { name: "OSSL ots~\\cite{openssl}", field: "c51" },
+  "curve25519/openssl-ots": { name: "OSSL fe-51 ots~\\cite{openssl}", field: "a51" },
+  "curve25519/openssl-fe64-ots": { name: "OSSL fe-64 ots~\\cite{openssl}", field: "a64" },
+  "curve25519/openssl-fe51-cryptopt": { name: "OSSL fe-51+\\textbf\\cryptopt", field: "a51" },
+  "curve25519/openssl-fe64-cryptopt": { name: "OSSL fe-64+\\textbf\\cryptopt", field: "a64" },
+  "curve25519/openssl-fe64-fiat": { name: "OSSL fe-64+Fiat-C", field: "c64" },
+  "curve25519/openssl-fe64-cryptopt-eql": { name: "OSSL 64+\\textbf\\cryptopt(mul as sq)", field: "a64" },
+  "curve25519/openssl-fe64-fiat-eql": { name: "OSSL 64+Fiat-C (mul as sq)", field: "c64" },
+  "curve25519/everest-hacl-51": { name: "HACL*~fe-51~\\cite{hacl}", field: "c51" }, // c   based
+  "curve25519/everest-hacl-64": { name: "HACL*~fe-64~\\cite{hacl}", field: "a64" }, // asm based
+  // "curve25519/everest-hacl-64-cryptopt": { name: "HACL*~fe-64~\\cite{hacl}+\\textbf\\cryptopt (fmul2 only)", field: "a64", },
+  "curve25519/everest-hacl-lib-51": { name: "HACL*~fe-51~\\cite{hacl}", field: "bin" }, // precompiled
+  "curve25519/everest-hacl-lib-64": { name: "HACL*~fe-64~\\cite{hacl}", field: "bin" }, // precompiled
+  // "curve25519/openssl-fe64-w-armdazh": { name: "OSSL fe-64 + (RFC7748~\\cite{oliveira_sac2017})", field: "a64", }, // https://github.com/armfazh/rfc7748_precomputed
 
   // SECP256k1
-  "crypto_scalarmult/secp256k1/openssl-ots": {
-    name: "OSSL ots",
-    field: "c port",
-  },
-  "crypto_scalarmult/secp256k1/openssl-cryptopt": {
-    name: "OSSL+\\textbf\\cryptopt",
-    field: "sa",
-  },
-  "crypto_scalarmult/secp256k1/libsecp256k1-ots": {
-    name: "libsecp256k1~\\cite{libsecp256k1}",
-    field: "sa",
-  },
-  "crypto_scalarmult/secp256k1/libsecp256k1-c-ots": {
-    name: "libsecp256k1~\\cite{libsecp256k1}",
-    field: "c52",
-  },
-  "crypto_scalarmult/secp256k1/libsecp256k1-ots-c-dettman": {
-    name: "libsecp256k1+Dettman (mul only)",
-    field: "c52",
-  },
-  "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-dettman": {
-    name: "libsecp256k1+\\textbf\\cryptopt (mul only)",
-    field: "sa",
-  },
-  "crypto_scalarmult/secp256k1/libsecp256k1-ots-cryptopt-bcc": {
-    name: "libsecp256k1+\\textbf\\cryptopt (CS2)",
-    field: "sa",
-  },
+  "secp256k1/openssl-ots": { name: "OSSL ots", field: "c port" },
+  "secp256k1/openssl-cryptopt": { name: "OSSL+\\textbf\\cryptopt", field: "sa" },
+  "secp256k1/libsecp256k1-ots": { name: "libsecp256k1~\\cite{libsecp256k1}", field: "sa" },
+  "secp256k1/libsecp256k1-c-ots": { name: "libsecp256k1~\\cite{libsecp256k1}", field: "c52" },
+  "secp256k1/libsecp256k1-ots-c-dettman": { name: "libsecp256k1+Dettman", field: "c52" },
+  "secp256k1/libsecp256k1-ots-cryptopt-dettman": { name: "libsecp256k1+\\textbf\\cryptopt", field: "sa" },
+  "secp256k1/libsecp256k1-ots-cryptopt-bcc": { name: "libsecp256k1+\\textbf\\cryptopt", field: "sa" },
 } as { [impl: string]: { name: string; field: string } };
 
 const machineOrder = [
@@ -269,7 +190,7 @@ const genBarTable = (): string => {
   const meat = implOrder
     .map((implementations) => {
       // something like p256
-      const folderFolder = implementations[0].split("/")[1];
+      const folderFolder = implementations[0].split("/")[0];
       const { heading, offset } = CAPTION_MAP[folderFolder];
 
       // mapped and filtered data
@@ -288,7 +209,7 @@ const genBarTable = (): string => {
         })
         .filter(({ byMachine }) => typeof byMachine !== "undefined") as {
         name: string; // displayName (sandy2x)
-        iname: string; // implname (crypto_scalarmult/curve25519/sandy2x)
+        iname: string; // implname (curve25519/sandy2x)
         field: string; // fieldimpl (asm || asm-v || ...)
         byMachine: { [m: string]: number };
       }[];
@@ -348,8 +269,8 @@ const genBarTable = (): string => {
 const dir = process.argv[2];
 
 const DB_REG_OK =
-  /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w/]+) try(\(\w+placeasm:\w+\))? (?<checksum>[\w/]+) (ok|unknown) (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) (?<impl>[-\w/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w/]+)/;
-// const DB_REG_CYCLES = /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w\/]+) try (?<checksum>[\w\/]+) ok (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) (?<impl>[\w\/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w\/]+)/;
+  /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w/]+) try(\(\w+placeasm:\w+\))? (?<checksum>[\w/]+) (ok|unknown) (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) crypto_scalarmult\/(?<impl>[-\w/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w/]+)/;
+// const DB_REG_CYCLES = /(?<supercopversion>\d+) (?<host>\w+) (?<abi>\w+) (?<date>\d+) (?<primitive>\w+) (?<timecop>[\w\/]+) try (?<checksum>[\w\/]+) ok (?<cycles>\d+) (?<chksmcycles>\d+) (?<cyclespersecond>\d+) crypto_scalarmult\/(?<impl>[\w\/]+) (?<cc>[/\w]+)_(?<cflags>[-=\w\/]+)/;
 
 const data = readdirSync(dir)
   .filter((hostname) => machineOrder.includes(hostname))
