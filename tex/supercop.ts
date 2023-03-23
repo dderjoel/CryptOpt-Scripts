@@ -17,21 +17,6 @@ const ROW_DESCRIPTION = "Implementation".padEnd(PAD_NAME + macrolen);
 const FIELD_DESCRIPTION = "Lang.".padStart(PAD_FIELD + macrolen);
 const MEAN_DESCRIPTION = "G.M.".padStart(PAD_CYC);
 
-const NOTE = [
-  // "\\vspace{2mm}",
-  "",
-  "Note:",
-  "G.M. stands for geometric mean;",
-  "ots stands for off-the-shelf;",
-  "asm means assembly;",
-  "-v indicates the use of vector instructions;",
-  // "bin means precompiled.",
-  "",
-  "\\cite{hacl} uses parallelized field arithmetic",
-].join("\n");
-
-const CAPTION = `Cost of scalar multiplication (in cycles) of different implementations benchmarking on different machines.`;
-const LABEL = "fulltable2";
 const CAPTION_MAP: {
   [curve: string]: { heading: string; offset: string };
 } = {
@@ -40,20 +25,6 @@ const CAPTION_MAP: {
   // p384: { heading: "P-384" },
   secp256k1: { heading: "secp256k1", offset: "+.6em" },
 };
-const table_start = (cap: string, label: string) =>
-  [
-    // "\\renewcommand{\\arraystretch}{0.99}",
-    "\\begin{sidewaystable}[h]",
-    "\\vspace{20em}",
-    "\\centering",
-    "",
-    `\\caption{${cap}}`,
-    `\\label{f:${label}}`,
-    "\\tiny",
-    // "\\small",
-  ].join("\n");
-
-const TABLE_END = `${NOTE}\n\\end{sidewaystable}\n`;
 
 const implOrder = [
   [
@@ -261,7 +232,7 @@ const genBarTable = (): string => {
     })
     .join("\n\n");
 
-  const bottom = ["", "\\bottomrule", "\\end{tabular}", "\\vspace{2mm} "].join("\n");
+  const bottom = ["", "\\bottomrule", "\\end{tabular}"].join("\n");
 
   return head + meat + bottom;
 };
@@ -303,6 +274,4 @@ const data = readdirSync(dir)
     return acc;
   }, {} as { [impl: string]: { [machine: string]: number } });
 
-console.log(table_start(CAPTION, LABEL));
 console.log(genBarTable());
-console.log(TABLE_END);
