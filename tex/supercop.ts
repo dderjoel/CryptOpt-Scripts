@@ -39,6 +39,8 @@ const implOrder = [
     "curve25519/openssl-fe51-cryptopt", // fiat unsaturated       (optimized)
     "curve25519/openssl-fe64-ots", //asm fe64
     "curve25519/openssl-fe64-cryptopt", // fiat saturated solinas (optimized)
+    "curve25519/openssl-fe51-champ", // cryptopt based but GM-best on all machines
+    "curve25519/openssl-fe64-champ", // cryptopt based but GM-best on all machines
     // "curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
 
     // "curve25519/everest-hacl-51", // C based
@@ -55,7 +57,9 @@ const implOrder = [
     "secp256k1/libsecp256k1-c-ots",
     // "secp256k1/libsecp256k1-ots-c-dettman",
     "secp256k1/libsecp256k1-ots-cryptopt-dettman",
-    "secp256k1/libsecp256k1-ots-cryptopt-bcc", // Case Study 2
+    "secp256k1/libsecp256k1-ots-cryptopt-bcc",
+    "secp256k1/libsecp256k1-ots-champ-dettman", // GM best on all machines
+    "secp256k1/libsecp256k1-ots-champ-bcc", // GM best on all machines
   ],
 ];
 const implMap = {
@@ -70,6 +74,8 @@ const implMap = {
   "curve25519/openssl-fe64-ots": { name: "OSSL fe-64 ots~\\cite{openssl}", field: "a64" },
   "curve25519/openssl-fe51-cryptopt": { name: "OSSL fe-51+\\textbf\\cryptopt", field: "a51" },
   "curve25519/openssl-fe64-cryptopt": { name: "OSSL fe-64+\\textbf\\cryptopt", field: "a64" },
+  "curve25519/openssl-fe51-champ": { name: "OSSL fe-51+\\textbf Best", field: "a51" },
+  "curve25519/openssl-fe64-champ": { name: "OSSL fe-64+\\textbf Best", field: "a64" },
   "curve25519/openssl-fe64-fiat": { name: "OSSL fe-64+Fiat-C", field: "c64" },
   "curve25519/openssl-fe64-cryptopt-eql": { name: "OSSL 64+\\textbf\\cryptopt(mul as sq)", field: "a64" },
   "curve25519/openssl-fe64-fiat-eql": { name: "OSSL 64+Fiat-C (mul as sq)", field: "c64" },
@@ -91,6 +97,8 @@ const implMap = {
     field: "sa",
   },
   "secp256k1/libsecp256k1-ots-cryptopt-bcc": { name: "libsecp256k1+\\textbf\\cryptopt (Opt)", field: "sa" },
+  "secp256k1/libsecp256k1-ots-champ-dettman": { name: "libsecp256k1+\\textbf Best (Fiat)", field: "sa" },
+  "secp256k1/libsecp256k1-ots-champ-bcc": { name: "libsecp256k1+\\textbf Best (Opt)", field: "sa" },
 } as { [impl: string]: { name: string; field: string } };
 
 const machineOrder = [
