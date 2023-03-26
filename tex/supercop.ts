@@ -86,8 +86,11 @@ const implMap = {
   "secp256k1/libsecp256k1-ots": { name: "libsecp256k1~\\cite{libsecp256k1}", field: "sa" },
   "secp256k1/libsecp256k1-c-ots": { name: "libsecp256k1~\\cite{libsecp256k1}", field: "c52" },
   "secp256k1/libsecp256k1-ots-c-dettman": { name: "libsecp256k1+Dettman", field: "c52" },
-  "secp256k1/libsecp256k1-ots-cryptopt-dettman": { name: "libsecp256k1+\\textbf\\cryptopt", field: "sa" },
-  "secp256k1/libsecp256k1-ots-cryptopt-bcc": { name: "libsecp256k1+\\textbf\\cryptopt", field: "sa" },
+  "secp256k1/libsecp256k1-ots-cryptopt-dettman": {
+    name: "libsecp256k1+\\textbf\\cryptopt (Fiat)",
+    field: "sa",
+  },
+  "secp256k1/libsecp256k1-ots-cryptopt-bcc": { name: "libsecp256k1+\\textbf\\cryptopt (Opt)", field: "sa" },
 } as { [impl: string]: { name: string; field: string } };
 
 const machineOrder = [
