@@ -44,7 +44,7 @@ const implOrder = [
     // "curve25519/openssl-fe64-fiat", //     fiat saturated solinas (C)
 
     // "curve25519/everest-hacl-51", // C based
-    "curve25519/everest-hacl-64", // asm   based
+// "curve25519/everest-hacl-64", // asm   based
     // "curve25519/everest-hacl-64-cryptopt", // asm   based but fmul2 from fiat+CO
     // "curve25519/everest-hacl-lib-51", // precompiled
     // "curve25519/everest-hacl-lib-64", // precompiled
