@@ -25,6 +25,9 @@ if (!best_folder) {
 }
 const COMPILER = ["gcc", "clang"];
 const path_to_cycle_js = path.resolve("../../../dist/CountCycle.js");
+const isInvalidMeasurement = (x) => {
+    return typeof x !== "number" || isNaN(x) || x <= 0;
+};
 const results = fs
     .readdirSync(best_folder)
     .filter((filename) => filename.endsWith(".asm"))
@@ -36,13 +39,17 @@ const results = fs
     }
     // getCyclecount for filenames and CCs
     COMPILER.forEach((cc) => {
+        let medianAsm;
+        let medianCheck;
         // Measure
-        const [medianAsm, medianCheck] = execFileSync("node", [path_to_cycle_js, filename], {
-            env: { ...process.env, CC: cc },
-        })
-            .toString()
-            .split(" ")
-            .map((s) => Number(s));
+        do {
+            [medianAsm, medianCheck] = execFileSync("node", [path_to_cycle_js, filename], {
+                env: { ...process.env, CC: cc },
+            })
+                .toString()
+                .split(" ")
+                .map((s) => Number(s));
+        } while (isInvalidMeasurement(medianAsm) || isInvalidMeasurement(medianCheck));
         acc[sym].push({
             filename,
             opton,
