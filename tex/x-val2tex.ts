@@ -124,31 +124,41 @@ const bySymbol = fs
   .map((content) => JSON.parse(content) as CompareResult)
   .reduce(
     (acc, compareResult) => {
-      Object.entries(compareResult).forEach(([symbol, counts]) => {
-        if (!(symbol in acc)) {
-          acc[symbol] = {};
-        }
-        counts.forEach(({ opton, median, filename, runon }) => {
-          if (opton in compilerMap) {
-            // assign different name to opton gcc-11 -> gcc, etc
-            opton = compilerMap[opton];
+      Object.entries(compareResult)
+        .filter(([symbol]) => {
+          try {
+            return symbol2cm(symbol).curve in curveNameMapping;
+          } catch (e) {
+            console.error("not using " + symbol);
+            return false;
           }
-          if (opton in cpu_simplename) {
-            opton = cpu_simplename[opton];
+        })
+        .forEach(([symbol, counts]) => {
+          if (!(symbol in acc)) {
+            acc[symbol] = {};
           }
-          if (!(opton in acc[symbol])) {
-            acc[symbol][opton] = {};
-          }
-          if (!(filename in acc[symbol][opton])) {
-            acc[symbol][opton][filename] = [];
-          }
-          // fill the opt on (i.e. one asm-solution)
-          acc[symbol][opton][filename].push({
-            ranOn: cpu_simplename[runon],
-            cycles: median,
+          counts.forEach(({ opton, median, filename, runon }) => {
+            if (opton in compilerMap) {
+              // assign different name to opton gcc-11 -> gcc, etc
+              opton = compilerMap[opton];
+            }
+            if (opton in cpu_simplename) {
+              opton = cpu_simplename[opton];
+            }
+            if (!(opton in acc[symbol])) {
+              acc[symbol][opton] = {};
+            }
+            if (!(filename in acc[symbol][opton])) {
+              acc[symbol][opton][filename] = [];
+            }
+            if (median)
+              // fill the opt on (i.e. one asm-solution)
+              acc[symbol][opton][filename].push({
+                ranOn: cpu_simplename[runon],
+                cycles: median,
+              });
           });
         });
-      });
       return acc;
     },
     {} as {
