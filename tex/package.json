@@ -8,10 +8,10 @@
     "printWidth": 110
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.187",
-    "@types/node": "^18.11.9",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "^18.15.11",
     "lodash": "^4.17.21",
-    "simple-statistics": "^7.8.0",
+    "simple-statistics": "^7.8.3",
     "ts-node": "^10.9.1"
   }
 }
