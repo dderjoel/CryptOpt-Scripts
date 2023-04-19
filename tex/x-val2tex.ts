@@ -67,6 +67,8 @@ const cpu_simplename: { [key: string]: string } = {
 };
 
 const curveNameMapping: { [k: string]: string } = {
+  bls12_384_p: "BLS12-384 q",
+  bls12_384_q: "BLS12-384 p",
   p448_solinas: "Curve448",
   p224: "P-224",
   p256: "P-256",
