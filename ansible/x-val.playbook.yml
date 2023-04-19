@@ -7,11 +7,18 @@
     # fail entire playbook, if any host fails (esp. the touch command)
   any_errors_fatal: true
   vars:
-    asmFolder: /mnt/pil/x-val/asms
-    jsonFolder: /mnt/pil/x-val
-    resultDir: "/home/joel/cryptopt/results.wilson.20230113T141423"
+    suff: "results.bls12.wilson.20230418T135500"
+    asmFolder:  "/mnt/pil/x-val.{{suff}}/asm"
+    jsonFolder: "/mnt/pil/x-val.{{suff}}/json"
+    resultDir: /home/joel/cryptopt/{{suff}}
+    N: 10
 
   tasks:
+    - name: create folders and set permissions
+      become: true
+      shell:
+        cmd: if test "$(hostname)" = 'pil'; then mkdir  -p "{{asmFolder}}" "{{jsonFolder}}"; chown -R nobody "$(dirname "{{asmFolder}}")"; chmod -R 777 "$(dirname "{{asmFolder}}")"; echo "done";  else sleep 2; echo no; fi
+
     - name: MOUNT PIL
       become: true
       command: mount /mnt/pil

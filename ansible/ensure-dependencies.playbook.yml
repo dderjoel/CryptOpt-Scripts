@@ -16,6 +16,10 @@
           - llvm
           - g++
           - clang
+          - gcc
+          - g++-12
+          - gcc-12
+          - clang-15
             # for gnuplot w/o x11
           - gnuplot-nox
             # for pdfunite

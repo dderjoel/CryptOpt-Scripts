@@ -9,7 +9,7 @@
   become: false
   any_errors_fatal: true #if any host fails, then the entire play is failed.
   environment:
-    RESULTS_PATH: '~/cryptopt/results.wilson.20230320T175000'
+    RESULTS_PATH: '~/cryptopt/results.wilson.20230406T143200'
   tasks:
     - name: check if resultsdir is present
       stat:

@@ -9,7 +9,7 @@
     symbol: manual/fiat_curve25519_solinas_mulmod
     symbol: manual/fiat_secp256k1_dettman_mul
     symbol: "" # empty string for 'all'
-    resultDir: "/home/joel/cryptopt/results.wilson.20230113T141423"
+    resultDir: /home/joel/cryptopt/results.bls12.wilson.20230418T135500
   tasks:
     - name: ensure clean.mux is up to date
       template:

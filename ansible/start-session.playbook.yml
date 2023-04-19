@@ -11,8 +11,8 @@
     runArgs:
       # example running from fiat
       - "--bridge fiat"
-      - "--curve curve25519"
-      - "--method mul"
+      - "--curve secp256k1_dettman"
+      - "--method square"
 
       # example running manual
       # - "--bridge manual"
@@ -24,11 +24,10 @@
       # - "--curve secp256k1"
       # - "--method square"
 
-      - "--evals 200k"
-      - "--bets 20"
+      - "--evals 400k"
+      - "--bets 30"
       - "--betRatio 0.1"
-      # - "--no-proof"
-      - "--resultDir ~/cryptopt/results.fmul2.{{date}}"
+      - "--resultDir ~/cryptopt/results.400k.30.{{date}}"
 
   tasks:
     - name: ensure session.mux is up to date
