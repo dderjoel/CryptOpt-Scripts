@@ -271,8 +271,9 @@ Object.entries(bySymbol)
           .fill("c")
           .join("")}}`,
       );
-      console.log(`\t\t\\addlinespace[-.5em]`); // to squeeze into pageheight
+      console.log(`\t\t\\addlinespace[-1em]`); // to squeeze into pageheight
       console.log(`\t\t\\multicolumn{${numberOfColumns}}{c}{\\small ${curveToCaption(symbol)}}\\\\`);
+      console.log("\t\t\\addlinespace[-.1em]\n");
       console.log(`\t\t\\cmidrule{1-${numberOfColumns}}`);
 
       const header0 = `\t\t${ft} run~on & ${cpuorder
@@ -281,7 +282,7 @@ Object.entries(bySymbol)
         .join(" & ")}\\\\`;
       const header1 = `\t\t${ft} opt~on ${Array(numberOfColumns).fill(" ").join("&")}\\\\`;
       console.log(header0);
-      console.log("\t\t\\addlinespace[+.2em]\n");
+      console.log("\t\t\\addlinespace[-.1em]\n");
       console.log(header1);
     } else {
       //distance between mul/sq
@@ -299,7 +300,7 @@ Object.entries(bySymbol)
       }
 
       if (!(y_opton in optOnStructure)) {
-        console.warn(`${y_opton} should be present in ${symbol}'s optOnStructure`);
+        console.warn(`${y_opton} should be present in ${symbol}'s optOnStructure 1`);
         return `${ft}${cf}${NA}`;
       }
       const allOptimistionRunsForCurrentRow = Object.values(optOnStructure[y_opton]).flatMap((runs) => runs);
@@ -314,7 +315,7 @@ Object.entries(bySymbol)
         // that happens if there was no optimisation for current `symbol` from machine `col`
         let reference = [] as number[];
         if (!(col in optOnStructure)) {
-          console.warn(`${col} should be present in ${symbol}'s optOnStructure`);
+          console.warn(`${col} should be present in ${symbol}'s optOnStructure 2`);
           return `${ft}${cf}${NA}`;
         }
         // the reference is all those implementations which are optimised and run on the current col
@@ -420,7 +421,7 @@ function symbol2cm(sy: string): { curve: string; method: method_t } {
     }
   });
   if (method) return { curve, method };
-  throw new Error(sym + "is in the wrong format");
+  throw new Error("'" + sym + "' is in the wrong format");
 }
 
 const stream = fs.createWriteStream("", { fd: 3 });

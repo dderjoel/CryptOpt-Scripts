@@ -4,7 +4,7 @@ import { groupBy, minBy, set } from "lodash";
 import path from "path";
 
 // padding constants to have beautified latex
-const PAD_CYC = 29;
+const PAD_CYC = 44;
 const PAD_NAME = 42;
 const PAD_FIELD = 14;
 const FACTOR: 1 | 1000 = 1000; // 1k
@@ -217,7 +217,8 @@ const genBarTable = (): string => {
         const ratioStr = `{\\tiny (${ratio}x)}`;
         const cyclesStr = (FACTOR as number) === 1000 ? `${(c / FACTOR).toFixed(0)}k` : c;
 
-        const m = isSmallest ? `\\textbf{${cyclesStr} ${ratioStr}}` : `${cyclesStr} ${ratioStr}`;
+        let m = isSmallest ? `\\textbf{${cyclesStr} ${ratioStr}}` : `${cyclesStr} ${ratioStr}`;
+        m += "\\hspace{-.5em}";
         return m.padStart(PAD_CYC);
       };
 
