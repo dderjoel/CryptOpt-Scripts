@@ -76,10 +76,10 @@ const curveNameMapping: { [k: string]: string } = {
   p434: "SIKEp434",
   p521: "P-521",
   curve25519: "Curve25519",
-  curve25519_solinas: "Curve25519S",
+  // curve25519_solinas: "Curve25519S",
   poly1305: "Poly1305",
-  secp256k1: "secp256k1",
-  secp256k1_dettman: "secp256k1D",
+  secp256k1_montgomery: "secp256k1",
+  // secp256k1_dettman: "secp256k1D",
 };
 
 const GM = "G.M.";
@@ -98,9 +98,7 @@ const cpuorder = [
 
 const compilerMap: { [k: string]: cc } = {
   gcc: "GCC",
-  "gcc-11": "GCC",
   clang: "Clang",
-  "/mnt/pil/clang13/bin/clang": "Clang",
 };
 
 const curveToCaption = (curve: string): string => {

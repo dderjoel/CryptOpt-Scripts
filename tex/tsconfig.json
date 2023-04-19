@@ -4,11 +4,13 @@
     "module": "CommonJS",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports":true,
     "noImplicitAny": true,
     "sourceMap": false,
     "skipLibCheck": true
   },
   "exclude": ["./node_modules"],
+  "include": ["./x-val2tex.ts"],
   "ts-node": {
     "transpileOnly": true
   }
