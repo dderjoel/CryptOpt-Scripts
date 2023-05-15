@@ -46,18 +46,6 @@ function process_asmfile() {
   # base command
   cmd="PATH=${NODE_PATH}:\$PATH /usr/bin/env node ${CRYPTOPT_ROOT}/dist/CountCycle.js ${asm} 2>>${MINION_LOG}.${MINION_ID}.err"
 
-  if [[ "${asm}" = *"manual"* ]]; then
-    # manual files, we need to find the c/json files.
-
-    # quick hack here may need improvement
-    if [[ "${asm}" = *"curve25519_solinas_mulmod"* ]]; then
-      cmd="${cmd} ${CRYPTOPT_ROOT}/test/manual-bridge/modmul/curve25519_solinas.c ${CRYPTOPT_ROOT}/test/manual-bridge/modmul/curve25519_solinas.json"
-    fi
-    if [[ "${asm}" = *"secp256k1_dettman_mul"* ]]; then
-      cmd="${cmd} ${CRYPTOPT_ROOT}/test/manual-bridge/dettman/secp256k1_dettman_64.c ${CRYPTOPT_ROOT}/test/manual-bridge/dettman/secp256k1_dettman_64.json"
-    fi
-  fi
-
   log "${cmd}"
   #cycle check unused at the moment
   read -r cycl_asm _cycl_check < <(eval "${cmd}")
