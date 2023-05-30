@@ -2,8 +2,10 @@
 source "$(dirname ${0})/../_internal/count_instructions_helper.sh"
 
 [[ $# -lt 1 ]] &&
-  echo -e "Usage: ${0} [-t|-total] [-s|--symbol=function_name] FILENAME.[so|o|asm] \nNote: Will use first found global symbol by default if no function_name was given\nIf --total is given, it will only print the number of total instructions." &&
-  exit 1
+  echo -e "Usage: ${0} [-t|-total] [-s|--symbol=function_name] FILENAME[.asm]\n" \
+    "Note: Will use first found global symbol by default if no function_name was given\n" \
+    "If --total is given, it will only print the number of total instructions.\n" \
+    "Will use objdump if the filename does not end with '.asm'" && exit 1
 
 temp=$(getopt -o "vts:" --longoptions "total,verbose,symbol:" -- "${@}")
 eval set -- "${temp}"
