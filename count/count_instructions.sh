@@ -61,6 +61,7 @@ function get_clean_from_object() {
 
   e1="1,/<.*>:/d"    # delete until functionsymbol
   e2="s/QWORD PTR//" # delete QWORD keyword
+  e3="s/#.*$//"      # delete references to DATA segment (e.g. sbb REG, [MEM]; where MEM is in r/o data, it'll try to get the name from debug symbols)
 
   # disassemble
   objdump "${file_name}" \
@@ -69,7 +70,8 @@ function get_clean_from_object() {
     --section=.text \
     -M intel |
     # clean
-    sed -e "${e1}" -e "${e2}"
+    sed -e "${e1}" -e "${e2}" -e "${e3}"
+
 }
 
 function get_clean_from_asm() {
