@@ -5,7 +5,7 @@
 # - hosts: kivsa nakhash aljamus nuc akrav akavish pil arnevet
   become: true
   tasks:
-    - name: Set chache
+    - name: Set cache
       become: true
       when: no
       command: sed -i /etc/apt/sources.list -e 's!https://archive!https://us.archive!g'
