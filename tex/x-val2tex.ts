@@ -9,7 +9,7 @@
  *
  * Call with 1>./path/to/rescompact.tex
  * Call with 3>./path/to/res-avg.tex
- * eg: ./x-val2tex.ts  /mnt/pil/x-val >~/p/rescompact.tex 3>~/p/res-avg.tex
+ * eg: ./x-val2tex.ts  /mnt/pil/x-val >./full.tex 3>./avg.tex; then pdflatex  xval
  *
  * or to test
  * 3>&1
@@ -18,8 +18,10 @@
  *
  *
  */
+
 import fs from "fs";
 import { resolve } from "path";
+import { mapValues } from "lodash";
 import * as Stat from "simple-statistics";
 
 type savings = number[];
@@ -67,8 +69,8 @@ const cpu_simplename: { [key: string]: string } = {
 };
 
 const curveNameMapping: { [k: string]: string } = {
-  bls12_384_p: "BLS12-384 q",
-  bls12_384_q: "BLS12-384 p",
+  // bls12_381_p: "BLS12-381 q",
+  // bls12_381_q: "BLS12-381 p",
   p448_solinas: "Curve448",
   p224: "P-224",
   p256: "P-256",
@@ -76,10 +78,10 @@ const curveNameMapping: { [k: string]: string } = {
   p434: "SIKEp434",
   p521: "P-521",
   curve25519: "Curve25519",
-  // curve25519_solinas: "Curve25519S",
+  curve25519_solinas: "Curve25519-Solinas",
   poly1305: "Poly1305",
   secp256k1_montgomery: "secp256k1",
-  // secp256k1_dettman: "secp256k1D",
+  secp256k1_dettman: "secp256k1-Dettman",
 };
 
 const GM = "G.M.";
@@ -112,6 +114,13 @@ const curveToCaption = (curve: string): string => {
   return c;
 };
 
+// should contain all the implementations with all medians while processing. Then at the end, one can calculate GM's on all of them to find the candidate for merging into a lib.
+const champs: {
+  [func: string]: {
+    [name: string]: number[];
+  };
+} = {};
+
 const is_compiler = (opton: string): opton is cc => /GCC|Clang/.test(opton);
 
 // create CompareResultmap from filenames
@@ -135,6 +144,9 @@ const bySymbol = fs
           if (!(symbol in acc)) {
             acc[symbol] = {};
           }
+          if (!(symbol in champs)) {
+            champs[symbol] = {};
+          }
           counts.forEach(({ opton, median, filename, runon }) => {
             if (opton in compilerMap) {
               // assign different name to opton gcc-11 -> gcc, etc
@@ -149,12 +161,19 @@ const bySymbol = fs
             if (!(filename in acc[symbol][opton])) {
               acc[symbol][opton][filename] = [];
             }
-            if (median)
+            if (!(filename in champs[symbol])) {
+              champs[symbol][filename] = [];
+            }
+            if (median) {
               // fill the opt on (i.e. one asm-solution)
               acc[symbol][opton][filename].push({
                 ranOn: cpu_simplename[runon],
                 cycles: median,
               });
+              champs[symbol][filename].push(median);
+            } else {
+              console.warn(`why is median ${median} falsy?`);
+            }
           });
         });
       return acc;
@@ -174,11 +193,11 @@ const bySymbol = fs
   );
 
 const ft = `\\fontsize{5}{7}\\selectfont`;
-const cf = "\\rule{-.5em}{0em}"; // makes the cell smaller in width
-console.log(`\\renewcommand{\\arraystretch}{0.45}`);
+const cf = "\\rule{-.2em}{0em}"; // makes the cell smaller in width
+console.log(`\\renewcommand{\\arraystretch}{0.6}`);
 console.log(`\\begin{table*}\\centering`);
-console.log(`\\caption{\\tiny Optimization results. We show the relative improvements in \\% for the multiplication (top) and squaring (bottom) operations; time savings are marked in blue. 
-First, to observe hardware-specific optimization, the 10-by-10 matrix shows the performance the optimized operation that have been optimized on one machine and then run on another. 
+console.log(`\\caption{ Optimization results. We show the relative improvements in \\% for the multiplication (top) and squaring (bottom) operations; time savings are marked in blue. 
+First, to observe hardware-specific optimization, the ${cpuorder.length}-by-${cpuorder.length} matrix shows the performance the optimized operation that have been optimized on one machine and then run on another. 
 The subsequent two rows (Clang/GCC) then show the time savings of our optimized operations over off-the-shelf-compilers.
 Lastly, \`\`Final'' shows the time savings of our best-performing implementation over the best-performing compiler-generated version.
 }
@@ -246,6 +265,7 @@ const createCell = (ratio: number, tiny = true): string => {
   return tiny ? `${ft}${cf}${color}$${text}$${cf}` : `${color}{$${text}$}`;
 };
 
+fs.writeFileSync("/tmp/bySymbol.json", JSON.stringify(bySymbol, undefined, 2));
 Object.entries(bySymbol)
   .sort((e1, e2) => e1[0].localeCompare(e2[0])) // to have an alphabetical order of symbols (curves)
   .forEach(([symbol, optOnStructure]) => {
@@ -269,7 +289,7 @@ Object.entries(bySymbol)
           .fill("c")
           .join("")}}`,
       );
-      console.log(`\t\t\\addlinespace[-1em]`); // to squeeze into pageheight
+      // console.log(`\t\t\\addlinespace[-1em]`); // to squeeze into pageheight
       console.log(`\t\t\\multicolumn{${numberOfColumns}}{c}{\\small ${curveToCaption(symbol)}}\\\\`);
       console.log("\t\t\\addlinespace[-.1em]\n");
       console.log(`\t\t\\cmidrule{1-${numberOfColumns}}`);
@@ -298,7 +318,9 @@ Object.entries(bySymbol)
       }
 
       if (!(y_opton in optOnStructure)) {
-        console.warn(`${y_opton} should be present in ${symbol}'s optOnStructure 1`);
+        console.warn(
+          `${y_opton} should be present in ${symbol}'s optOnStructure 1 (means there is no assembly file from ${y_opton} implementing ${symbol})`,
+        );
         return `${ft}${cf}${NA}`;
       }
       const allOptimistionRunsForCurrentRow = Object.values(optOnStructure[y_opton]).flatMap((runs) => runs);
@@ -313,7 +335,9 @@ Object.entries(bySymbol)
         // that happens if there was no optimisation for current `symbol` from machine `col`
         let reference = [] as number[];
         if (!(col in optOnStructure)) {
-          console.warn(`${col} should be present in ${symbol}'s optOnStructure 2`);
+          console.warn(
+            `${y_opton} should be present in ${symbol}'s optOnStructure 2 (means there is no assembly file from ${y_opton} implementing ${symbol})`,
+          );
           return `${ft}${cf}${NA}`;
         }
         // the reference is all those implementations which are optimised and run on the current col
@@ -423,10 +447,10 @@ function symbol2cm(sy: string): { curve: string; method: method_t } {
 }
 
 const stream = fs.createWriteStream("", { fd: 3 });
-stream.write(`\\begin{wraptable}{r}{0.45\\textwidth}\n`);
+stream.write(`\\begin{wraptable}{r}{\\textwidth}\n`);
 stream.write(`\t\\small\n`);
 stream.write(`\t\\begin{center}\n`);
-stream.write(`\t\\caption{Geometric means of \\cryptopt vs.\\ off-the-shelf compilers.}\n`);
+stream.write(`\t\\caption{Geometric means of \\cryptopt vs. off-the-shelf compilers.}\n`);
 stream.write(`\t\\label{tab:res-avg}\n`);
 stream.write(`\t\t\\begin{tabular}{@{}lccccc}\n`);
 stream.write(`\t\t\\toprule\n`);
@@ -459,4 +483,20 @@ stream.write(`\t\\end{center}\n`);
 stream.write(`\\end{wraptable}\n`);
 CCs.forEach((cc, i) => {
   console.error(`GMLen:${GMlen}\nGM speedup for ${cc.padEnd(6)}  :${Math.pow(GMs[i], 1 / GMlen).toFixed(4)}`);
+});
+
+console.error(
+  `\n~~~~~~~~~~~Geometic Means of cycles of each impl over ${cpuorder.length} archs (to copy into your lib) ~~~~~~~~~~~~\n`,
+);
+Object.entries(champs).forEach(([func, champ]) => {
+  console.error(`~~~~~~~~~~~~~~~~~~~~~${func}~~~~~~~~~~~~~~~~~~~~~`);
+
+  const sortedBest = Object.entries(mapValues(champ, (cycles) => Stat.geometricMean(cycles)))
+    .sort(([, c1], [, c2]) => c1 - c2)
+    .slice(0, 10);
+  sortedBest
+    .map(([name, cycles]) => `${cycles.toFixed(4).padStart(20)} -- ${name}`)
+    .forEach((s) => console.error(s));
+  console.error(`tar czf ${func}.tar.gz ${sortedBest.map(([n]) => n).join(" ")}`);
+  console.error(`cp ${sortedBest.map(([n]) => n).join(" ")} ~/c/generated/libsecp256k1/`);
 });
